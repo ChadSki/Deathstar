@@ -24,7 +24,7 @@
 #define __DATE__ "Unknown"
 #endif
 
-#include "ZZTMap.h"
+#include "ZZTDeathstar.h"
 
 #define PROG_VERSION "Deathstar 1.0a1"
 #define PROG_CREATED "9th January, 2014"

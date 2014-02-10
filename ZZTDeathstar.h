@@ -1,4 +1,4 @@
-//ZZTMap.h
+//ZZTDeathstar.h
 
 /*
  

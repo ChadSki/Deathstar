@@ -1,4 +1,4 @@
-//ZZTMap.c
+//ZZTDeathstar.c
 
 /*
  
@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "ZZTMap.h"
+#include "ZZTDeathstar.h"
 
 #define META_MEMORY_OFFSET 0x40440000 //Halo CE and Halo PC ONLY
 
