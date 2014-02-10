@@ -28,10 +28,10 @@ typedef enum {
     true = 1
 } bool;
 
-struct TagID *deprotectedTags;
+TagID *deprotectedTags;
 int deprotectedTagsCount;
 
-struct MapTag *tagArray;
+ MapTag *tagArray;
 uint32_t tagCount;
 
 uint32_t magic;
@@ -40,7 +40,7 @@ char *mapdata;
 uint32_t mapdataSize;
 uint32_t tagdataSize;
 
-static bool isNulledOut(struct TagID tag) {
+static bool isNulledOut(TagID tag) {
     return tag.tagTableIndex == 0xFFFF;
 }
 
@@ -55,7 +55,7 @@ MapData openMapAtPath(const char *path) {
         mapData.buffer = malloc(mapData.length);
         fread(mapData.buffer,mapData.length,0x1,map);
         fclose(map);
-        struct HaloMapHeader *mapHeader = (struct HaloMapHeader *)(mapData.buffer);
+         HaloMapHeader *mapHeader = ( HaloMapHeader *)(mapData.buffer);
         if(mapHeader->indexOffset > mapData.length) {
             mapData.error = MAP_INVALID_INDEX_POINTER;
         }
@@ -75,7 +75,7 @@ void saveMap(const char *path, MapData map) {
     fclose(mapFile);
 }
 
-static void zteam_changeTagClass(struct TagID tagId,const char *class) {
+static void zteam_changeTagClass(TagID tagId,const char *class) {
     if(tagId.tagTableIndex != 0xFFFF)
         tagArray[tagId.tagTableIndex].classA = *(uint32_t *)(class);
 }
@@ -84,7 +84,7 @@ static void *translatePointer(uint32_t pointer) { //translates a map pointer to 
     return mapdata + (pointer - magic);
 }
 
-static void zteam_deprotectShdr(struct TagID tagId) {
+static void zteam_deprotectShdr(TagID tagId) {
     uint32_t tagClasses[] = {
         *(uint32_t *)&"rdhs",
         *(uint32_t *)&"rdhs",
@@ -99,22 +99,22 @@ static void zteam_deprotectShdr(struct TagID tagId) {
         *(uint32_t *)&"tems",
         *(uint32_t *)&"alps"
     };
-    struct Shader shdr = *(struct Shader *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+     Shader shdr = *( Shader *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     if(shdr.type < 0x3 || shdr.type > sizeof(tagClasses) / 0x4)
         return;
     zteam_changeTagClass(tagId, (const char *)&tagClasses[shdr.type]);
 }
 
-static void zteam_deprotectMod2(struct TagID tagId) {
+static void zteam_deprotectMod2(TagID tagId) {
     zteam_changeTagClass(tagId,"2dom");
-    struct Mod2Dependencies model = *(struct Mod2Dependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-    struct Mod2ShaderDependencies *shaders = translatePointer(model.mod2Shaders.offset);
+     Mod2Dependencies model = *( Mod2Dependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+     Mod2ShaderDependencies *shaders = translatePointer(model.mod2Shaders.offset);
     for(uint32_t i=0;i<model.mod2Shaders.count;i++) {
         zteam_deprotectShdr(shaders[i].shader.tagId);
     }
 }
 
-static void zteam_deprotectObjectTag(struct TagID tagId) {
+static void zteam_deprotectObjectTag(TagID tagId) {
     if(tagId.tagTableIndex > tagCount) return;
     for(int i=0; i<deprotectedTagsCount ;i++) {
         if(deprotectedTags[i].tagTableIndex == tagId.tagTableIndex)
@@ -138,7 +138,7 @@ static void zteam_deprotectObjectTag(struct TagID tagId) {
     deprotectedTags[deprotectedTagsCount] = tagId;
     deprotectedTagsCount++;
     
-    struct ObjeDependencies object = *(struct ObjeDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+     ObjeDependencies object = *( ObjeDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     
     if(object.tagObjectType > sizeof(tagClasses) / 0x4)
     {
@@ -156,17 +156,17 @@ static void zteam_deprotectObjectTag(struct TagID tagId) {
     zteam_changeTagClass(object.physics.tagId,"syhp");
     
     if(object.tagObjectType == OBJECT_WEAP) {
-        struct WeapDependencies weap = *(struct WeapDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+         WeapDependencies weap = *( WeapDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
         zteam_changeTagClass(weap.fpModel.tagId, "2dom");
         zteam_changeTagClass(weap.fpAnimation.tagId, "rtna");
-        struct WeapTriggerDependencies *triggers = translatePointer(weap.triggers.offset);
+         WeapTriggerDependencies *triggers = translatePointer(weap.triggers.offset);
         for(uint32_t i=0;i<weap.triggers.count;i++) {
             zteam_deprotectObjectTag(triggers[i].projectile.tagId);
         }
     }
     if(object.tagObjectType == OBJECT_VEHI || object.tagObjectType == OBJECT_BIPD) {
-        struct UnitDependencies unit = *(struct UnitDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-        struct UnitWeaponDependencies *weapons = (struct UnitWeaponDependencies *)translatePointer(unit.weapons.offset);
+         UnitDependencies unit = *( UnitDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+         UnitWeaponDependencies *weapons = ( UnitWeaponDependencies *)translatePointer(unit.weapons.offset);
         for(uint32_t i=0;i<unit.weapons.count;i++) {
             zteam_deprotectObjectTag(weapons[i].weapon.tagId);
         }
@@ -174,23 +174,23 @@ static void zteam_deprotectObjectTag(struct TagID tagId) {
 }
 
 static void zteam_deprotectObjectPalette(TagReflexive reflexive) {
-    struct ScnrPaletteDependency *palette = (struct ScnrPaletteDependency *)translatePointer(reflexive.offset);
+     ScnrPaletteDependency *palette = ( ScnrPaletteDependency *)translatePointer(reflexive.offset);
     for(int i=0;i<reflexive.count;i++) {
         zteam_deprotectObjectTag(palette[i].object.tagId);
     }
 }
 
 static void zteam_deprotectMatgObjectTagCollection(TagReflexive reflexive) {
-    struct MatgTagCollectionDependencies *collection = (struct MatgTagCollectionDependencies *)translatePointer(reflexive.offset);
+     MatgTagCollectionDependencies *collection = ( MatgTagCollectionDependencies *)translatePointer(reflexive.offset);
     for(int i=0;i<reflexive.count;i++) {
         zteam_deprotectObjectTag(collection[i].tag.tagId);
     }
 }
 
-static void zteam_deprotectItmc(struct TagID tag) {
-    struct ItmcDependencies itmc = *(struct ItmcDependencies *)translatePointer(tagArray[tag.tagTableIndex].dataOffset);
+static void zteam_deprotectItmc(TagID tag) {
+     ItmcDependencies itmc = *( ItmcDependencies *)translatePointer(tagArray[tag.tagTableIndex].dataOffset);
     zteam_changeTagClass(tag,"cmti");
-    struct ItmcPermutationDependencies *itmcPerm = (struct ItmcPermutationDependencies *)translatePointer(itmc.permutation.offset);
+     ItmcPermutationDependencies *itmcPerm = ( ItmcPermutationDependencies *)translatePointer(itmc.permutation.offset);
     for(uint32_t i=0;i<itmc.permutation.count;i++) {
         zteam_deprotectObjectTag(itmcPerm[i].tagDependency.tagId);
     }
@@ -207,18 +207,18 @@ static void *translateCustomPointer(uint32_t pointer, uint32_t customMagic, uint
         return mapdata + offset + (pointer - customMagic);
 }
 
-static void zteam_deprotectSBSP(struct TagID tagId,uint32_t fileOffset, uint32_t bspMagic) {
+static void zteam_deprotectSBSP(TagID tagId,uint32_t fileOffset, uint32_t bspMagic) {
     if(tagId.tagTableIndex == 0xFFFF)
         return;
     zteam_changeTagClass(tagId, "psbs");
-    struct SBSPDependencies sbsp = *(struct SBSPDependencies *)(mapdata + fileOffset);
-    struct SBSPCollisionMaterialsDependencies *materials = (struct SBSPCollisionMaterialsDependencies *)translateCustomPointer(sbsp.collMaterials.offset,bspMagic,fileOffset);
+     SBSPDependencies sbsp = *( SBSPDependencies *)(mapdata + fileOffset);
+     SBSPCollisionMaterialsDependencies *materials = ( SBSPCollisionMaterialsDependencies *)translateCustomPointer(sbsp.collMaterials.offset,bspMagic,fileOffset);
     for(uint32_t i=0;i<sbsp.collMaterials.count;i++) {
         zteam_deprotectShdr(materials[i].shader.identity);
     }
-    struct SBSPLightmapsDependencies *lightmaps = (struct SBSPLightmapsDependencies *)translateCustomPointer(sbsp.lightmaps.offset,bspMagic,fileOffset);
+     SBSPLightmapsDependencies *lightmaps = ( SBSPLightmapsDependencies *)translateCustomPointer(sbsp.lightmaps.offset,bspMagic,fileOffset);
     for(uint32_t i=0;i<sbsp.lightmaps.count;i++) {
-        struct SBSPLightmapsMaterialsReflexives *materials = (struct SBSPLightmapsMaterialsReflexives *)translateCustomPointer(lightmaps[i].materials.offset, bspMagic, fileOffset);
+         SBSPLightmapsMaterialsReflexives *materials = ( SBSPLightmapsMaterialsReflexives *)translateCustomPointer(lightmaps[i].materials.offset, bspMagic, fileOffset);
         for(uint32_t q=0;q<lightmaps[i].materials.count;q++) {
             zteam_deprotectShdr(materials[q].shader.identity);
         }
@@ -269,8 +269,8 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     char *modded_buffer = malloc(length);
     memcpy(modded_buffer,map_buffer,length);
     
-    struct HaloMapHeader *header = (struct HaloMapHeader *)(modded_buffer);
-    struct HaloMapIndex *index = (struct HaloMapIndex *)(modded_buffer + header->indexOffset);
+     HaloMapHeader *header = ( HaloMapHeader *)(modded_buffer);
+     HaloMapIndex *index = ( HaloMapIndex *)(modded_buffer + header->indexOffset);
     
     mapdata = modded_buffer;
     magic = META_MEMORY_OFFSET - header->indexOffset;
@@ -278,7 +278,7 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     char *names = calloc(0x20 * index->tagCount,0x1);
     int namesLength = 0x0;
     
-    tagArray = (struct MapTag *)(translatePointer(index->tagIndexOffset));
+    tagArray = ( MapTag *)(translatePointer(index->tagIndexOffset));
     tagCount = index->tagCount;
     
     for(uint32_t i=0;i<tagCount;i++) {
@@ -346,25 +346,25 @@ MapData zteam_deprotect(MapData map)
     mapdata = new_map.buffer;
     uint32_t length = new_map.length;
     
-    struct HaloMapHeader *header = (struct HaloMapHeader *)(new_map.buffer);
-    struct HaloMapIndex *index = (struct HaloMapIndex *)(new_map.buffer + header->indexOffset);
+     HaloMapHeader *header = ( HaloMapHeader *)(new_map.buffer);
+     HaloMapIndex *index = ( HaloMapIndex *)(new_map.buffer + header->indexOffset);
     
-    deprotectedTags = calloc(sizeof(struct TagID) * index->tagCount,0x1);
+    deprotectedTags = calloc(sizeof(TagID) * index->tagCount,0x1);
     
     magic = META_MEMORY_OFFSET - header->indexOffset;
     
-    tagArray = (struct MapTag *)(translatePointer(index->tagIndexOffset));
+    tagArray = ( MapTag *)(translatePointer(index->tagIndexOffset));
     tagCount = index->tagCount;
     
     mapdataSize = length;
     tagdataSize = length - header->indexOffset;
     
-    struct MapTag scenarioTag = tagArray[index->scenarioTag.tagTableIndex];
+     MapTag scenarioTag = tagArray[index->scenarioTag.tagTableIndex];
     deprotectedTags[deprotectedTagsCount] = scenarioTag.identity;
     deprotectedTagsCount++;
     zteam_changeTagClass(index->scenarioTag,"rncs");
     
-    struct ScnrDependencies scnrData = *(struct ScnrDependencies *)translatePointer(scenarioTag.dataOffset);
+     ScnrDependencies scnrData = *( ScnrDependencies *)translatePointer(scenarioTag.dataOffset);
     
     zteam_deprotectObjectPalette(scnrData.sceneryPalette);
     zteam_deprotectObjectPalette(scnrData.bipedPalette);
@@ -376,22 +376,22 @@ MapData zteam_deprotect(MapData map)
     zteam_deprotectObjectPalette(scnrData.lifiPalette);
     zteam_deprotectObjectPalette(scnrData.sscePalette);
     
-    struct ScnrSkies *skies = (struct ScnrSkies *)translatePointer(scnrData.skies.offset);
+     ScnrSkies *skies = ( ScnrSkies *)translatePointer(scnrData.skies.offset);
     for(uint32_t i=0;i<scnrData.skies.count;i++) {
         zteam_changeTagClass(skies[i].sky.tagId, " yks");
     }
     
-    struct ScnrBSPs *bsps = (struct ScnrBSPs *)translatePointer(scnrData.BSPs.offset);
+     ScnrBSPs *bsps = ( ScnrBSPs *)translatePointer(scnrData.BSPs.offset);
     for(uint32_t i=0;i<scnrData.BSPs.count;i++) {
         zteam_deprotectSBSP(bsps[i].bsp.tagId, bsps[i].fileOffset, bsps[i].bspMagic);
     }
     
-    struct ScnrNetgameItmcDependencies *itmcs = (struct ScnrNetgameItmcDependencies *)translatePointer(scnrData.netgameItmcs.offset);
+     ScnrNetgameItmcDependencies *itmcs = ( ScnrNetgameItmcDependencies *)translatePointer(scnrData.netgameItmcs.offset);
     for(uint32_t i=0;i<scnrData.netgameItmcs.count;i++) {
         zteam_deprotectItmc(itmcs[i].itemCollection.tagId);
     }
     
-    struct TagID matgTag;
+    TagID matgTag;
     matgTag.tagTableIndex = 0xFFFF;
     
     for(int i=0;i<tagCount;i++) {
@@ -404,16 +404,16 @@ MapData zteam_deprotect(MapData map)
     }
     
     if(!isNulledOut(matgTag)) {
-        struct MatgDependencies matg = *(struct MatgDependencies *)(translatePointer(tagArray[matgTag.tagTableIndex].dataOffset));
+         MatgDependencies matg = *( MatgDependencies *)(translatePointer(tagArray[matgTag.tagTableIndex].dataOffset));
         zteam_deprotectMatgObjectTagCollection(matg.weapons);
         zteam_deprotectMatgObjectTagCollection(matg.powerups);
         
-        struct MatgPlayerInformationDependencies *playerInfo = translatePointer(matg.playerInfo.offset);
+         MatgPlayerInformationDependencies *playerInfo = translatePointer(matg.playerInfo.offset);
         for(uint32_t i=0;i<matg.playerInfo.count;i++) {
             zteam_deprotectObjectTag(playerInfo[i].unit.tagId);
         }
         
-        struct MatgMultiplayerInformationDependencies *multiplayerInfo = translatePointer(matg.multiplayerInfo.offset);
+         MatgMultiplayerInformationDependencies *multiplayerInfo = translatePointer(matg.multiplayerInfo.offset);
         for(uint32_t i=0;i<matg.multiplayerInfo.count;i++) {
             zteam_deprotectObjectTag(multiplayerInfo[i].unit.tagId);
             zteam_deprotectObjectTag(multiplayerInfo[i].flag.tagId);
