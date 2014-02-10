@@ -18,10 +18,10 @@
  */
 
 #include <stdio.h>
-#include "ZZTMap.h"
 #include <time.h>
+#include "ZZTMap.h"
 
-#define META_MEMORY_OFFSET 0x40440000
+#define META_MEMORY_OFFSET 0x40440000 //Halo CE and Halo PC ONLY
 
 typedef enum {
     false = 0,
@@ -44,8 +44,8 @@ static bool isNulledOut(struct TagID tag) {
     return tag.tagTableIndex == 0xFFFF;
 }
 
-struct MapData openMapAtPath(const char *path) {
-    struct MapData mapData;
+MapData openMapAtPath(const char *path) {
+    MapData mapData;
     FILE *map = fopen(path,"r");
     if(map)
     {
@@ -65,15 +65,13 @@ struct MapData openMapAtPath(const char *path) {
     }
     else {
         mapData.error = MAP_INVALID_PATH;
-        mapData.buffer = NULL;
-        mapData.length = 0;
     }
     return mapData;
 }
 
-void saveMap(const char *path,char *map_buffer, uint32_t length) {
+void saveMap(const char *path, MapData map) {
     FILE *mapFile = fopen(path,"wb");
-    fwrite(map_buffer,1,length,mapFile);
+    fwrite(map.buffer,1,map.length,mapFile);
     fclose(mapFile);
 }
 
@@ -82,7 +80,7 @@ static void zteam_changeTagClass(struct TagID tagId,const char *class) {
         tagArray[tagId.tagTableIndex].classA = *(uint32_t *)(class);
 }
 
-static void *translatePointer(uint32_t pointer) {
+static void *translatePointer(uint32_t pointer) { //translates a map pointer to where it points to in Deathstar
     return mapdata + (pointer - magic);
 }
 
@@ -175,14 +173,14 @@ static void zteam_deprotectObjectTag(struct TagID tagId) {
     }
 }
 
-static void zteam_deprotectObjectPalette(struct TagReflexive reflexive) {
+static void zteam_deprotectObjectPalette(TagReflexive reflexive) {
     struct ScnrPaletteDependency *palette = (struct ScnrPaletteDependency *)translatePointer(reflexive.offset);
     for(int i=0;i<reflexive.count;i++) {
         zteam_deprotectObjectTag(palette[i].object.tagId);
     }
 }
 
-static void zteam_deprotectMatgObjectTagCollection(struct TagReflexive reflexive) {
+static void zteam_deprotectMatgObjectTagCollection(TagReflexive reflexive) {
     struct MatgTagCollectionDependencies *collection = (struct MatgTagCollectionDependencies *)translatePointer(reflexive.offset);
     for(int i=0;i<reflexive.count;i++) {
         zteam_deprotectObjectTag(collection[i].tag.tagId);
@@ -264,9 +262,10 @@ static bool classAutogeneric(uint32_t class) {
 
 #define MATCHING_THRESHOLD 0.7
 
-char *name_deprotect(char *map_buffer,uint32_t length, uint32_t *new_length, struct MapData *maps, int map_count) {
+MapData name_deprotect(MapData map, MapData *maps, int map_count) {
+    uint32_t length = map.length;
+    char *map_buffer = map.buffer;
     
-    *new_length = length;
     char *modded_buffer = malloc(length);
     memcpy(modded_buffer,map_buffer,length);
     
@@ -298,7 +297,7 @@ char *name_deprotect(char *map_buffer,uint32_t length, uint32_t *new_length, str
             float best_match = 0.0;
             for(int map=0;map<map_count;map++) {
                 if(maps[map].error != MAP_OK) continue;
-                
+                //TODO: add fuzzy tag comparison
             }
             if(best_match != 0.0) {
                 deprotected = false;
@@ -315,10 +314,10 @@ char *name_deprotect(char *map_buffer,uint32_t length, uint32_t *new_length, str
         namesLength += newname_length + 0x1;
     }
     
-    *new_length = length + namesLength;
+    uint32_t new_length = length + namesLength;
     
-    header->length = *new_length;
-    header->metaSize = *new_length - header->indexOffset;
+    header->length = new_length;
+    header->metaSize = new_length - header->indexOffset;
     
     char *new_buffer = calloc(length + namesLength,0x1);
     memcpy(new_buffer, modded_buffer, length);
@@ -326,20 +325,29 @@ char *name_deprotect(char *map_buffer,uint32_t length, uint32_t *new_length, str
     
     free(modded_buffer);
     
-    return new_buffer;
+    MapData new_map;
+    new_map.buffer = new_buffer;
+    new_map.length = new_length;
+    new_map.error = MAP_OK;
+    
+    return new_map;
 }
 
-void zteam_deprotect(char *map_buffer,uint32_t length)
+MapData zteam_deprotect(MapData map)
 {
-    /*
-     clock_t t1, t2;
-     
-     t1 = clock();*/
+    MapData new_map;
     
-    mapdata = map_buffer;
+    new_map.buffer = malloc(map.length);
+    new_map.length = map.length;
+    new_map.error = MAP_OK;
     
-    struct HaloMapHeader *header = (struct HaloMapHeader *)(map_buffer);
-    struct HaloMapIndex *index = (struct HaloMapIndex *)(map_buffer + header->indexOffset);
+    memcpy(new_map.buffer,map.buffer,map.length);
+    
+    mapdata = new_map.buffer;
+    uint32_t length = new_map.length;
+    
+    struct HaloMapHeader *header = (struct HaloMapHeader *)(new_map.buffer);
+    struct HaloMapIndex *index = (struct HaloMapIndex *)(new_map.buffer + header->indexOffset);
     
     deprotectedTags = calloc(sizeof(struct TagID) * index->tagCount,0x1);
     
@@ -416,7 +424,5 @@ void zteam_deprotect(char *map_buffer,uint32_t length)
     
     free(deprotectedTags);
     
-    /*t2 = clock();
-     float diff = (((float)t2 - (float)t1) / CLOCKS_PER_SEC ) * 1000;
-     printf("Completed zteam deprotection in %f milliseconds.\n",diff);*/
+    return new_map;
 }

@@ -77,11 +77,11 @@ struct Shader {
     uint16_t type;
 };
 
-struct TagReflexive {
+typedef struct {
     uint32_t count;
     uint32_t offset;
     uint32_t zero;
-};
+} TagReflexive;
 
 struct TagDependency {
     char className[4];
@@ -129,38 +129,38 @@ struct MapTag {
 	char padding[0x8];
 };
 
-struct MapData {
+typedef struct {
     char *buffer;
     uint32_t length;
     MapError error;
-};
+} MapData;
 
-struct Dependency {
+typedef struct {
     char mainClass[4];
     uint32_t nameOffset;
     uint32_t zero;
     struct TagID tagId;
-}; //0x10
+} Dependency; //0x10
 
 struct Mod2ShaderDependencies {
-    struct Dependency shader;           //0x0
+    Dependency shader;           //0x0
     char padding[0x10];                 //0x10
 };
 
 struct Mod2Dependencies {
     char padding[0xDC];                 //0x0
-    struct TagReflexive mod2Shaders;    //0xDC
+    TagReflexive mod2Shaders;    //0xDC
 };
 
 struct WeapMagazineMagazineDependencies {
     char padding[0xC];                  //0x0
-    struct Dependency equipment;        //0xC  eqip
+    Dependency equipment;        //0xC  eqip
 }; //0x1C
 
 struct WeapMagazineDependencies {
     char padding[0x38];                 //0x0
-    struct Dependency reloadingEffect;  //0x38 effe
-    struct Dependency chamberingEffect; //0x48 effe
+    Dependency reloadingEffect;  //0x38 effe
+    Dependency chamberingEffect; //0x48 effe
     char padding1[0xC];                 //0x58
     uint32_t magazinesCount;            //0x64
     uint32_t magazinesOffset;           //0x68
@@ -169,114 +169,114 @@ struct WeapMagazineDependencies {
 
 struct WeapTriggerFiringEffects {
     char padding[0x24];                 //0x0
-    struct Dependency firingEffect;     //0x24 effe
-    struct Dependency misfireEffect;    //0x34 effe
-    struct Dependency emptyEffect;      //0x44 effe
-    struct Dependency firingDamage;     //0x54 jpt!
-    struct Dependency misfireDamage;    //0x64 jpt!
-    struct Dependency emptyDamage;      //0x74 jpt!
+    Dependency firingEffect;     //0x24 effe
+    Dependency misfireEffect;    //0x34 effe
+    Dependency emptyEffect;      //0x44 effe
+    Dependency firingDamage;     //0x54 jpt!
+    Dependency misfireDamage;    //0x64 jpt!
+    Dependency emptyDamage;      //0x74 jpt!
 }; //0x84
 
 struct WeapTriggerDependencies {
     char padding[0x5C];                 //0x0
-    struct Dependency chargingEffect;   //0x5C effe
+    Dependency chargingEffect;   //0x5C effe
     char padding2[0x28];                //0x6C
-    struct Dependency projectile;       //0x94 proj <-- obje
+    Dependency projectile;       //0x94 proj <-- obje
     char padding3[0x64];                //0xA4
-    struct TagReflexive firingEffect;   //0x108
+    TagReflexive firingEffect;   //0x108
 }; //0x114
 
 struct ObjeDependencies {
     uint16_t tagObjectType;             //0x0
     char padding[0x26];                 //0x2
-    struct Dependency model;            //0x28 mod2
-    struct Dependency animation;        //0x38 antr
+    Dependency model;            //0x28 mod2
+    Dependency animation;        //0x38 antr
     char padding2[0x28];                //0x48
-    struct Dependency collision;        //0x70 coll
-    struct Dependency physics;          //0x80 phys
-    struct Dependency shader;           //0x90 shdr
-    struct Dependency creationEffect;   //0xA0 effe
+    Dependency collision;        //0x70 coll
+    Dependency physics;          //0x80 phys
+    Dependency shader;           //0x90 shdr
+    Dependency creationEffect;   //0xA0 effe
     char padding3[0xCC];                //0xB0
 }; //0x17C
 struct ItemDependencies {
     struct ObjeDependencies obje;       //0x0
     char padding[0xCC];                 //0x17C
-    struct Dependency materialEffects;  //0x248 foot
-    struct Dependency collisionSound;   //0x258 snd!
+    Dependency materialEffects;  //0x248 foot
+    Dependency collisionSound;   //0x258 snd!
     char padding2[0x80];                //0x268
-    struct Dependency detonatingEffect; //0x2E8 effe
-    struct Dependency detonationEffect; //0x2F8 effe
+    Dependency detonatingEffect; //0x2E8 effe
+    Dependency detonationEffect; //0x2F8 effe
 }; //0x308
 struct EqipDependencies {
     struct ItemDependencies item;       //0x0
     char padding[0x8];                  //0x308
-    struct Dependency pickupSound;      //0x310 snd!
+    Dependency pickupSound;      //0x310 snd!
 }; //0x320
 struct UnitCameraTrackDependencies {
-    struct Dependency cameraTrack;      //0x0
+    Dependency cameraTrack;      //0x0
     char padding[0x10];                 //0x10
 }; //0x18
 struct UnitWeaponDependencies {
-    struct Dependency weapon;           //0x0
+    Dependency weapon;           //0x0
     char padding[0x14];                 //0x10
 }; //0x24
 struct UnitDependencies {
     struct ObjeDependencies obje;       //0x0
     char padding[0xC];                  //0x17C
-    struct Dependency integratedLight;  //0x188 ligh
+    Dependency integratedLight;  //0x188 ligh
     char padding2[0x5C];                //0x198
-    struct TagReflexive cameraTrack;    //0x1F4
+    TagReflexive cameraTrack;    //0x1F4
     char padding3[0x4C];                //0x200
-    struct Dependency spawnedActor;     //0x24C actr
+    Dependency spawnedActor;     //0x24C actr
     char padding4[0x2C];                //0x25C
-    struct Dependency meleeDamage;      //0x288 jpt!
+    Dependency meleeDamage;      //0x288 jpt!
     char padding5[0x10];                //0x298
-    struct TagReflexive unitHud;        //0x2A8 -- not done yet
-    struct TagReflexive unitDialogue;   //0x2B4 -- not done yet
+    TagReflexive unitHud;        //0x2A8 -- not done yet
+    TagReflexive unitDialogue;   //0x2B4 -- not done yet
     char padding6[0x18];                //0x2C0
-    struct TagReflexive weapons;        //0x2D8
+    TagReflexive weapons;        //0x2D8
 };
 struct ProjDependencies {
     struct ObjeDependencies obje;       //0x0
     char padding[0x10];                 //0x17C
-    struct Dependency superDetonation;  //0x18C effe
+    Dependency superDetonation;  //0x18C effe
 }; //incomplete
 struct WeapDependencies {
     struct ItemDependencies item;       //0x0
     char padding[0x34];                 //0x308
-    struct Dependency readyEffect;      //0x33C effe
+    Dependency readyEffect;      //0x33C effe
     char padding2[0x28];                //0x34C
-    struct Dependency overheatedEffect; //0x374 effe
-    struct Dependency detonationEffect; //0x384 effe
-    struct Dependency meleeDamage;      //0x394 jpt!
-    struct Dependency meleeResponse;    //0x3A4 jpt!
+    Dependency overheatedEffect; //0x374 effe
+    Dependency detonationEffect; //0x384 effe
+    Dependency meleeDamage;      //0x394 jpt!
+    Dependency meleeResponse;    //0x3A4 jpt!
     char padding3[0x8];                 //0x3B4
-    struct Dependency firingParams;     //0x3BC actr
+    Dependency firingParams;     //0x3BC actr
     char padding4[0x54];                //0x3CC
-    struct Dependency lightOnEffect;    //0x420 effe
-    struct Dependency lightOffEffect;   //0x430 effe
+    Dependency lightOnEffect;    //0x420 effe
+    Dependency lightOffEffect;   //0x430 effe
     char padding5[0x1C];                //0x440
-    struct Dependency fpModel;          //0x45C mod2
-    struct Dependency fpAnimation;      //0x46C antr
+    Dependency fpModel;          //0x45C mod2
+    Dependency fpAnimation;      //0x46C antr
     char padding6[0x4];                 //0x47C
-    struct Dependency hud;              //0x480 wphi
-    struct Dependency pickupSound;      //0x490 snd!
-    struct Dependency zoomInSound;      //0x4A0 snd!
-    struct Dependency zoomOutSound;     //0x4B0 snd!
+    Dependency hud;              //0x480 wphi
+    Dependency pickupSound;      //0x490 snd!
+    Dependency zoomInSound;      //0x4A0 snd!
+    Dependency zoomOutSound;     //0x4B0 snd!
     char padding7[0x30];                //0x4C0
-    struct TagReflexive magazines;      //0x4F0
-    struct TagReflexive triggers;       //0x4FC
+    TagReflexive magazines;      //0x4F0
+    TagReflexive triggers;       //0x4FC
 }; //0x508
 struct ItmcPermutationDependencies {
     char padding[0x24];
-    struct Dependency tagDependency;
+    Dependency tagDependency;
     char padding1[0x20];
 };
 struct ItmcDependencies {
-    struct TagReflexive permutation;    //0x0;
+    TagReflexive permutation;    //0x0;
 };
 struct ScnrSkies {
-    struct Dependency sky;              //0x0
+    Dependency sky;              //0x0
 }; //0x10
 struct SBSPCollisionMaterialsDependencies {
     struct TagDependency shader;        //0x0
@@ -288,123 +288,123 @@ struct SBSPLightmapsMaterialsReflexives {
 };
 struct SBSPLightmapsDependencies {
     char padding[0x14];                 //0x0
-    struct TagReflexive materials;      //0x14
+    TagReflexive materials;      //0x14
 };
 struct SBSPDependencies {
     char padding[0xBC];
-    struct TagReflexive collMaterials;  //0xBC
+    TagReflexive collMaterials;  //0xBC
     char padding1[0x54];
-    struct TagReflexive lightmaps;      //0x11C
+    TagReflexive lightmaps;      //0x11C
 };
 struct ScnrBSPs {
     uint32_t fileOffset;                //0x0
     uint32_t tagSize;                   //0x4
     uint32_t bspMagic;                  //0x8
     uint32_t zero;                      //0xC
-    struct Dependency bsp;              //0x10
+    Dependency bsp;              //0x10
 };
 struct ScnrPaletteDependency {
-    struct Dependency object;           //0x0   obje <--
+    Dependency object;           //0x0   obje <--
     char padding[0x20];                 //0x10
 }; //0x30
 struct ScnrNetgameItmcDependencies {
     char padding[0x50];                 //0x0
-    struct Dependency itemCollection;   //0x50
+    Dependency itemCollection;   //0x50
     char padding1[0x30];                //0x60
 };//0x90
 struct ScnrStartingEquipment {
     char padding[0x3C];                 //0x0
-    struct Dependency equipment[0x6];   //0x3C
+    Dependency equipment[0x6];   //0x3C
     char padding1[0x30];                //0x9C
 };
 struct ScnrDependencies {
-    struct Dependency unknown[0x3];     //0x0   sbsp
-    struct TagReflexive skies;          //0x30
+    Dependency unknown[0x3];     //0x0   sbsp
+    TagReflexive skies;          //0x30
     char padding[0x1E0];                //0x3C
-    struct TagReflexive sceneryPalette; //0x21C
+    TagReflexive sceneryPalette; //0x21C
     char padding2[0xC];                 //0x228
-    struct TagReflexive bipedPalette;   //0x234
+    TagReflexive bipedPalette;   //0x234
     char padding3[0xC];                 //0x240
-    struct TagReflexive vehiclePalette; //0x24C
+    TagReflexive vehiclePalette; //0x24C
     char padding4[0xC];                 //0x258
-    struct TagReflexive equipPalette;   //0x264
+    TagReflexive equipPalette;   //0x264
     char padding5[0xC];                 //0x270
-    struct TagReflexive weaponPalette;  //0x27C
+    TagReflexive weaponPalette;  //0x27C
     char padding6[0x18];                //0x288
-    struct TagReflexive machinePalette; //0x2A0
+    TagReflexive machinePalette; //0x2A0
     char padding7[0xC];                 //0x2AC
-    struct TagReflexive controlPalette; //0x2B8
+    TagReflexive controlPalette; //0x2B8
     char padding8[0xC];                 //0x2C4
-    struct TagReflexive lifiPalette;    //0x2D0
+    TagReflexive lifiPalette;    //0x2D0
     char padding9[0xC];                 //0x2DC
-    struct TagReflexive sscePalette;    //0x2E8
+    TagReflexive sscePalette;    //0x2E8
     char padding10[0xC];                //0x2F4
     char padding11[0x84];               //0x300
-    struct TagReflexive netgameItmcs;   //0x384
-    struct TagReflexive startingItmcs;  //0x390
+    TagReflexive netgameItmcs;   //0x384
+    TagReflexive startingItmcs;  //0x390
     char padding12[0x18];               //0x39C
-    struct TagReflexive decalPalette;   //0x3B4 //offset is dependency[]
-    struct TagReflexive detailObjects;  //0x3C0 //object palette
+    TagReflexive decalPalette;   //0x3B4 //offset is dependency[]
+    TagReflexive detailObjects;  //0x3C0 //object palette
     char padding13[0x54];               //0x3CC
-    struct TagReflexive actorPalette;   //0x420 //offset is dependency[]
+    TagReflexive actorPalette;   //0x420 //offset is dependency[]
     char padding14[0x18];
-    struct TagReflexive AIAnimationRef; //0x444
+    TagReflexive AIAnimationRef; //0x444
     char padding15[0x154];              //0x450
-    struct TagReflexive BSPs;           //0x5A4
+    TagReflexive BSPs;           //0x5A4
 };
 
 struct MatgTagCollectionDependencies {
-    struct Dependency tag;
+    Dependency tag;
 };
 
 struct MatgGrenadesDependencies {
     char padding[0x4];                  //0x0
-    struct Dependency throwingEffect;   //0x4   effe
-    struct Dependency hudInterface;     //0x14
-    struct Dependency equipment;        //0x24  eqip
-    struct Dependency projectile;       //0x34  proj <--
+    Dependency throwingEffect;   //0x4   effe
+    Dependency hudInterface;     //0x14
+    Dependency equipment;        //0x24  eqip
+    Dependency projectile;       //0x34  proj <--
 }; //0x44
 
 struct MatgPlayerInformationDependencies {
-    struct Dependency unit;             //0x0   unit <--
+    Dependency unit;             //0x0   unit <--
     char padding[0xA8];                 //0x10
-    struct Dependency spawnEffect;      //0xB8  effe
+    Dependency spawnEffect;      //0xB8  effe
     char padding1[0x2C];                //0xC8
 }; //0xF4
 
 
 struct MatgMultiplayerInformationDependencies {
-    struct Dependency flag;             //0x0   weap <--
-    struct Dependency unit;             //0x10  unit <--
-    struct TagReflexive vehicles;       //0x20  --TagCollection
-    struct Dependency hillShader;       //0x2C  shdr
-    struct Dependency flagShader;       //0x3C  shdr
-    struct Dependency ball;             //0x4C  weap <--
-    struct Dependency sounds;           //0x5C  --TagCollection
+    Dependency flag;             //0x0   weap <--
+    Dependency unit;             //0x10  unit <--
+    TagReflexive vehicles;       //0x20  --TagCollection
+    Dependency hillShader;       //0x2C  shdr
+    Dependency flagShader;       //0x3C  shdr
+    Dependency ball;             //0x4C  weap <--
+    Dependency sounds;           //0x5C  --TagCollection
     char padding[0x34];                 //0x6C
 }; //0xA0
 
 struct MatgDependencies {
     char padding[0xF8];                 //0x0
-    struct TagReflexive sounds;         //0xF8  --TagCollection
-    struct TagReflexive camera;         //0x104 --TagCollection
+    TagReflexive sounds;         //0xF8  --TagCollection
+    TagReflexive camera;         //0x104 --TagCollection
     char padding1[0x18];                //0x110
-    struct TagReflexive grenades;       //0x128
-    struct TagReflexive rasterizerData; //0x134 --incomplete
-    struct TagReflexive interfaceBitm;  //0x140 --incomplete
-    struct TagReflexive weapons;        //0x14C --TagCollection
-    struct TagReflexive powerups;       //0x158 --TagCollection
-    struct TagReflexive multiplayerInfo;//0x164 --incomplete
-    struct TagReflexive playerInfo;     //0x170
-    struct TagReflexive fpInterface;    //0x17C --incomplete
-    struct TagReflexive fallingDamage;  //0x188 --incomplete
-    struct TagReflexive materials;      //0x194 --incomplete
+    TagReflexive grenades;       //0x128
+    TagReflexive rasterizerData; //0x134 --incomplete
+    TagReflexive interfaceBitm;  //0x140 --incomplete
+    TagReflexive weapons;        //0x14C --TagCollection
+    TagReflexive powerups;       //0x158 --TagCollection
+    TagReflexive multiplayerInfo;//0x164 --incomplete
+    TagReflexive playerInfo;     //0x170
+    TagReflexive fpInterface;    //0x17C --incomplete
+    TagReflexive fallingDamage;  //0x188 --incomplete
+    TagReflexive materials;      //0x194 --incomplete
 };
 
 
-struct MapData openMapAtPath(const char *path);
-void saveMap(const char *path, char *map_buffer, uint32_t length);
-void zteam_deprotect(char *map_buffer,uint32_t length);
-char *name_deprotect(char *map_buffer,uint32_t length, uint32_t *newLength, struct MapData *maps, int map_count);
+MapData openMapAtPath(const char *path);
+void saveMap(const char *path, MapData map);
+MapData zteam_deprotect(MapData map);
+MapData name_deprotect(MapData map, MapData *maps, int map_count);
 
 #endif

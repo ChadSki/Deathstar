@@ -99,7 +99,7 @@ int main(int argc, const char * argv[])
             return 0;
         }
         else {
-            struct MapData map = openMapAtPath(argv[2]);
+            MapData map = openMapAtPath(argv[2]);
             if(map.error == MAP_INVALID_PATH) {
                 printf("Failed to open map at %s. Invalid path?\n",argv[2]);
                 return 0;
@@ -109,15 +109,14 @@ int main(int argc, const char * argv[])
                 return 0;
             }
             
-            struct MapData *maps = malloc(sizeof(struct MapData) * (argc - 3));
+            MapData *maps = malloc(sizeof(MapData) * (argc - 3));
             
             for(int i=3; i<argc; i++) {
                 maps[i] = openMapAtPath(argv[i]);
             }
             
-            uint32_t finalSize;
-            char *newBuffer = name_deprotect(map.buffer, map.length, &finalSize, maps, argc - 3);
-            saveMap(argv[2], newBuffer, finalSize);
+            MapData final_map = name_deprotect(map, maps, argc - 3);
+            saveMap(argv[2], final_map);
             printf("Completed. Map has been saved!\n");
         }
         
@@ -129,7 +128,7 @@ int main(int argc, const char * argv[])
             return 0;
         }
         else {
-            struct MapData map = openMapAtPath(argv[2]);
+            MapData map = openMapAtPath(argv[2]);
             if(map.error == MAP_INVALID_PATH) {
                 printf("Failed to open map at %s. Invalid path?\n",argv[2]);
                 return 0;
@@ -138,18 +137,20 @@ int main(int argc, const char * argv[])
                 printf("Failed to open map. Path is valid, but map isn't.\n");
                 return 0;
             }
-            zteam_deprotect(map.buffer, map.length);
             
-            struct MapData *maps = malloc(sizeof(struct MapData) * (argc - 3));
+            MapData zteam_map = zteam_deprotect(map);
+            
+            free(map.buffer);
+            
+            MapData *maps = malloc(sizeof(MapData) * (argc - 3));
             
             for(int i=3; i<argc; i++) {
                 maps[i] = openMapAtPath(argv[i]);
             }
             
-            uint32_t finalSize;
-            char *newBuffer = name_deprotect(map.buffer, map.length, &finalSize, maps, argc - 3);
+            MapData final_map = name_deprotect(zteam_map, maps, argc - 3);
             
-            saveMap(argv[2], newBuffer, finalSize);
+            saveMap(argv[2], final_map);
             
             printf("Completed. Map has been saved!\n");
         }
@@ -162,7 +163,7 @@ int main(int argc, const char * argv[])
             return 0;
         }
         else {
-            struct MapData map = openMapAtPath(argv[2]);
+            MapData map = openMapAtPath(argv[2]);
             if(map.error == MAP_INVALID_PATH) {
                 printf("Failed to open map at %s. Invalid path?\n",argv[2]);
                 return 0;
@@ -171,8 +172,8 @@ int main(int argc, const char * argv[])
                 printf("Failed to open map. Path is valid, but map isn't.\n");
                 return 0;
             }
-            zteam_deprotect(map.buffer, map.length);
-            saveMap(argv[2], map.buffer, map.length);
+            MapData final_map = zteam_deprotect(map);
+            saveMap(argv[2], final_map);
             printf("Completed. Map has been saved!\n");
         }
         return 0;
