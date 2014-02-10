@@ -627,8 +627,8 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     char *modded_buffer = malloc(length);
     memcpy(modded_buffer,map_buffer,length);
     
-     HaloMapHeader *header = ( HaloMapHeader *)(modded_buffer);
-     HaloMapIndex *index = ( HaloMapIndex *)(modded_buffer + header->indexOffset);
+    HaloMapHeader *header = ( HaloMapHeader *)(modded_buffer);
+    HaloMapIndex *index = ( HaloMapIndex *)(modded_buffer + header->indexOffset);
     
     mapdata = modded_buffer;
     magic = META_MEMORY_OFFSET - header->indexOffset;
@@ -704,8 +704,8 @@ MapData zteam_deprotect(MapData map)
     mapdata = new_map.buffer;
     uint32_t length = new_map.length;
     
-     HaloMapHeader *header = ( HaloMapHeader *)(new_map.buffer);
-     HaloMapIndex *index = ( HaloMapIndex *)(new_map.buffer + header->indexOffset);
+    HaloMapHeader *header = ( HaloMapHeader *)(new_map.buffer);
+    HaloMapIndex *index = ( HaloMapIndex *)(new_map.buffer + header->indexOffset);
     
     deprotectedTags = calloc(sizeof(TagID) * index->tagCount,0x1);
     
@@ -717,12 +717,12 @@ MapData zteam_deprotect(MapData map)
     mapdataSize = length;
     tagdataSize = length - header->indexOffset;
     
-     MapTag scenarioTag = tagArray[index->scenarioTag.tagTableIndex];
+    MapTag scenarioTag = tagArray[index->scenarioTag.tagTableIndex];
     deprotectedTags[deprotectedTagsCount] = scenarioTag.identity;
     deprotectedTagsCount++;
     zteam_changeTagClass(index->scenarioTag,"rncs");
     
-     ScnrDependencies scnrData = *( ScnrDependencies *)translatePointer(scenarioTag.dataOffset);
+    ScnrDependencies scnrData = *( ScnrDependencies *)translatePointer(scenarioTag.dataOffset);
     
     zteam_deprotectObjectPalette(scnrData.sceneryPalette);
     zteam_deprotectObjectPalette(scnrData.bipedPalette);
@@ -734,17 +734,17 @@ MapData zteam_deprotect(MapData map)
     zteam_deprotectObjectPalette(scnrData.lifiPalette);
     zteam_deprotectObjectPalette(scnrData.sscePalette);
     
-     ScnrSkies *skies = ( ScnrSkies *)translatePointer(scnrData.skies.offset);
+    ScnrSkies *skies = ( ScnrSkies *)translatePointer(scnrData.skies.offset);
     for(uint32_t i=0;i<scnrData.skies.count;i++) {
         zteam_changeTagClass(skies[i].sky.tagId, " yks");
     }
     
-     ScnrBSPs *bsps = ( ScnrBSPs *)translatePointer(scnrData.BSPs.offset);
+    ScnrBSPs *bsps = ( ScnrBSPs *)translatePointer(scnrData.BSPs.offset);
     for(uint32_t i=0;i<scnrData.BSPs.count;i++) {
         zteam_deprotectSBSP(bsps[i].bsp.tagId, bsps[i].fileOffset, bsps[i].bspMagic);
     }
     
-     ScnrNetgameItmcDependencies *itmcs = ( ScnrNetgameItmcDependencies *)translatePointer(scnrData.netgameItmcs.offset);
+    ScnrNetgameItmcDependencies *itmcs = ( ScnrNetgameItmcDependencies *)translatePointer(scnrData.netgameItmcs.offset);
     for(uint32_t i=0;i<scnrData.netgameItmcs.count;i++) {
         zteam_deprotectItmc(itmcs[i].itemCollection.tagId);
     }
@@ -762,16 +762,16 @@ MapData zteam_deprotect(MapData map)
     }
     
     if(!isNulledOut(matgTag)) {
-         MatgDependencies matg = *( MatgDependencies *)(translatePointer(tagArray[matgTag.tagTableIndex].dataOffset));
+        MatgDependencies matg = *( MatgDependencies *)(translatePointer(tagArray[matgTag.tagTableIndex].dataOffset));
         zteam_deprotectMatgObjectTagCollection(matg.weapons);
         zteam_deprotectMatgObjectTagCollection(matg.powerups);
         
-         MatgPlayerInformationDependencies *playerInfo = translatePointer(matg.playerInfo.offset);
+        MatgPlayerInformationDependencies *playerInfo = translatePointer(matg.playerInfo.offset);
         for(uint32_t i=0;i<matg.playerInfo.count;i++) {
             zteam_deprotectObjectTag(playerInfo[i].unit.tagId);
         }
         
-         MatgMultiplayerInformationDependencies *multiplayerInfo = translatePointer(matg.multiplayerInfo.offset);
+        MatgMultiplayerInformationDependencies *multiplayerInfo = translatePointer(matg.multiplayerInfo.offset);
         for(uint32_t i=0;i<matg.multiplayerInfo.count;i++) {
             zteam_deprotectObjectTag(multiplayerInfo[i].unit.tagId);
             zteam_deprotectObjectTag(multiplayerInfo[i].flag.tagId);
