@@ -139,10 +139,6 @@ static void zteam_deprotectObjectTag(struct TagID tagId) {
     
     deprotectedTags[deprotectedTagsCount] = tagId;
     deprotectedTagsCount++;
-    /*char s[5];
-     memcpy(s, (char *)&tagArray[tagId.tagTableIndex].classA, 4);
-     s[4] = 0x0;
-     printf("Deprotecting %s.%s\n",translatePointer(tagArray[tagId.tagTableIndex].nameOffset),s);*/
     
     struct ObjeDependencies object = *(struct ObjeDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     
