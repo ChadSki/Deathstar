@@ -108,7 +108,7 @@ static bool isNulledOut(TagID tag) {
 
 static void zteam_changeTagClass(TagID tagId,const char *class) {
     if(tagId.tagTableIndex != 0xFFFF)
-    tagArray[tagId.tagTableIndex].classA = *(uint32_t *)(class);
+        tagArray[tagId.tagTableIndex].classA = *(uint32_t *)(class);
 }
 
 static void *translatePointer(uint32_t pointer) { //translates a map pointer to where it points to in Deathstar
@@ -116,28 +116,113 @@ static void *translatePointer(uint32_t pointer) { //translates a map pointer to 
 }
 
 static void zteam_deprotectShdr(TagID tagId) {
+    if(isNulledOut(tagId)) return; //however, this also means the map is broken
     uint32_t tagClasses[] = {
-        *(uint32_t *)&"rdhs",
-        *(uint32_t *)&"rdhs",
-        *(uint32_t *)&"rdhs",
-        *(uint32_t *)&"vnes",
-        *(uint32_t *)&"osos",
-        *(uint32_t *)&"rtos",
-        *(uint32_t *)&"ihcs",
-        *(uint32_t *)&"xecs",
-        *(uint32_t *)&"taws",
-        *(uint32_t *)&"algs",
-        *(uint32_t *)&"tems",
-        *(uint32_t *)&"alps"
+        *(uint32_t *)&SHDR,
+        *(uint32_t *)&SHDR,
+        *(uint32_t *)&SHDR,
+        *(uint32_t *)&SENV,
+        *(uint32_t *)&SOSO,
+        *(uint32_t *)&SOTR,
+        *(uint32_t *)&SCHI,
+        *(uint32_t *)&SCEX,
+        *(uint32_t *)&SWAT,
+        *(uint32_t *)&SGLA,
+        *(uint32_t *)&SMET,
+        *(uint32_t *)&SPLA
     };
-    Shader shdr = *(Shader *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-    if(shdr.type < 0x3 || shdr.type > sizeof(tagClasses) / 0x4)
-    return;
+    void *location = translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    Shader shdr = *(Shader *)location;
+    if(shdr.type < 0x3 || shdr.type > sizeof(tagClasses) / 0x4) return;
     zteam_changeTagClass(tagId, (const char *)&tagClasses[shdr.type]);
+    if(shdr.type == SHADER_SCEX) {
+        ShaderScexDependencies scex = *(ShaderScexDependencies *)location;
+        ShaderShaderLayersDependencies *layers = translatePointer(scex.layers.offset);
+        for(uint32_t i=0; i<scex.layers.count; i++) {
+            zteam_deprotectShdr(layers[i].shader.tagId);
+        }
+        zteam_changeTagClass(scex.lensflare.tagId, LENS);
+        ShaderSchiMapDependencies *stage4maps = (ShaderSchiMapDependencies *)translatePointer(scex.stage4maps.offset);
+        for(uint32_t i=0; i<scex.stage4maps.count;i++) {
+            zteam_changeTagClass(stage4maps[i].map.tagId, BITM);
+        }
+        ShaderSchiMapDependencies *stage2maps = (ShaderSchiMapDependencies *)translatePointer(scex.stage2maps.offset);
+        for(uint32_t i=0; i<scex.stage2maps.count;i++) {
+            zteam_changeTagClass(stage2maps[i].map.tagId, BITM);
+        }
+    }
+    else if(shdr.type == SHADER_SCHI) {
+        ShaderSchiDependencies schi = *(ShaderSchiDependencies *)location;
+        ShaderShaderLayersDependencies *layers = translatePointer(schi.layers.offset);
+        for(uint32_t i=0; i<schi.layers.count; i++) {
+            zteam_deprotectShdr(layers[i].shader.tagId);
+        }
+        ShaderSchiMapDependencies *maps = translatePointer(schi.maps.offset);
+        for(uint32_t i=0; i<schi.maps.count; i++) {
+            zteam_changeTagClass(maps[i].map.tagId, BITM);
+        }
+        zteam_changeTagClass(schi.lensflare.tagId, LENS);
+    }
+    else if(shdr.type == SHADER_SENV) {
+        ShaderSenvDependencies senv = *(ShaderSenvDependencies *)location;
+        zteam_changeTagClass(senv.baseMap.tagId, BITM);
+        zteam_changeTagClass(senv.bumpMap.tagId, BITM);
+        zteam_changeTagClass(senv.illuminationMap.tagId, BITM);
+        zteam_changeTagClass(senv.lensFlare.tagId, LENS);
+        zteam_changeTagClass(senv.microDetailMap.tagId, BITM);
+        zteam_changeTagClass(senv.primaryDetailMap.tagId, BITM);
+        zteam_changeTagClass(senv.secondaryDetailMap.tagId, BITM);
+        zteam_changeTagClass(senv.reflectionCubeMap.tagId, BITM);
+    }
+    else if(shdr.type == SHADER_SGLA) {
+        ShaderSglaDependencies sgla = *(ShaderSglaDependencies *)location;
+        zteam_changeTagClass(sgla.bgTint.tagId, BITM);
+        zteam_changeTagClass(sgla.bumpMap.tagId, BITM);
+        zteam_changeTagClass(sgla.diffuseDetailMap.tagId, BITM);
+        zteam_changeTagClass(sgla.diffuseMap.tagId, BITM);
+        zteam_changeTagClass(sgla.reflectionMap.tagId, BITM);
+        zteam_changeTagClass(sgla.specularDetailMap.tagId, BITM);
+        zteam_changeTagClass(sgla.specularMap.tagId, BITM);
+    }
+    else if(shdr.type == SHADER_SMET) {
+        ShaderSmetDependencies smet = *(ShaderSmetDependencies *)location;
+        zteam_changeTagClass(smet.map.tagId, BITM);
+    }
+    else if(shdr.type == SHADER_SOSO) {
+        ShaderSosoDependencies soso = *(ShaderSosoDependencies *)location;
+        zteam_changeTagClass(soso.baseMap.tagId, BITM);
+        zteam_changeTagClass(soso.detailMap.tagId, BITM);
+        zteam_changeTagClass(soso.multiMap.tagId, BITM);
+        zteam_changeTagClass(soso.reflectMap.tagId, BITM);
+    }
+    else if(shdr.type == SHADER_SOTR) {
+        ShaderSotrDependencies sotr = *(ShaderSotrDependencies *)location;
+        ShaderShaderLayersDependencies *layers = translatePointer(sotr.layers.offset);
+        for(uint32_t i=0; i<sotr.layers.count; i++) {
+            zteam_deprotectShdr(layers[i].shader.tagId);
+        }
+        ShaderSotrMapDependencies *maps = translatePointer(sotr.maps.offset);
+        for(uint32_t i=0; i<sotr.maps.count; i++) {
+            zteam_changeTagClass(maps[i].map.tagId, BITM);
+        }
+        zteam_changeTagClass(sotr.lensflare.tagId, LENS);
+    }
+    else if(shdr.type == SHADER_SPLA) {
+        ShaderSplaDependencies spla = *(ShaderSplaDependencies *)location;
+        zteam_changeTagClass(spla.primaryNoiseMap.tagId, BITM);
+        zteam_changeTagClass(spla.secondaryNoiseMap.tagId, BITM);
+    }
+    else if(shdr.type == SHADER_SWAT) {
+        ShaderSwatDependencies swat = *(ShaderSwatDependencies *)location;
+        zteam_changeTagClass(swat.baseMap.tagId, BITM);
+        zteam_changeTagClass(swat.reflectionMap.tagId, BITM);
+        zteam_changeTagClass(swat.rippleMap.tagId, BITM);
+    }
 }
 
 static void zteam_deprotectMod2(TagID tagId) {
-    zteam_changeTagClass(tagId,"2dom");
+    if(isNulledOut(tagId)) return;
+    zteam_changeTagClass(tagId,MOD2);
     Mod2Dependencies model = *( Mod2Dependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     Mod2ShaderDependencies *shaders = translatePointer(model.mod2Shaders.offset);
     for(uint32_t i=0;i<model.mod2Shaders.count;i++) {
@@ -148,8 +233,7 @@ static void zteam_deprotectMod2(TagID tagId) {
 static void zteam_deprotectObjectTag(TagID tagId) {
     if(tagId.tagTableIndex > tagCount) return;
     for(int i=0; i<deprotectedTagsCount ;i++) {
-        if(deprotectedTags[i].tagTableIndex == tagId.tagTableIndex)
-        return;
+        if(deprotectedTags[i].tagTableIndex == tagId.tagTableIndex) return;
     }
     uint32_t tagClasses[] = {
         *(uint32_t *)&"dpib",
@@ -173,23 +257,20 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     
     if(object.tagObjectType > sizeof(tagClasses) / 0x4)
     {
-        zteam_changeTagClass(tagId,"ejbo");
-        return;
+        return; //failed to ID tag
     }
     
     zteam_changeTagClass(tagId,(const char *)&tagClasses[object.tagObjectType]);
     
-    if(!isNulledOut(object.model.tagId)) {
-        zteam_deprotectMod2(object.model.tagId);
-    }
-    zteam_changeTagClass(object.animation.tagId,"rtna");
-    zteam_changeTagClass(object.collision.tagId,"lloc");
-    zteam_changeTagClass(object.physics.tagId,"syhp");
+    zteam_deprotectMod2(object.model.tagId);
+    zteam_changeTagClass(object.animation.tagId,ANTR);
+    zteam_changeTagClass(object.collision.tagId,COLL);
+    zteam_changeTagClass(object.physics.tagId,PHYS);
     
     if(object.tagObjectType == OBJECT_WEAP) {
         WeapDependencies weap = *( WeapDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-        zteam_changeTagClass(weap.fpModel.tagId, "2dom");
-        zteam_changeTagClass(weap.fpAnimation.tagId, "rtna");
+        zteam_deprotectMod2(weap.fpModel.tagId);
+        zteam_changeTagClass(weap.fpAnimation.tagId, ANTR);
         WeapTriggerDependencies *triggers = translatePointer(weap.triggers.offset);
         for(uint32_t i=0;i<weap.triggers.count;i++) {
             zteam_deprotectObjectTag(triggers[i].projectile.tagId);
@@ -220,7 +301,7 @@ static void zteam_deprotectMatgObjectTagCollection(TagReflexive reflexive) {
 
 static void zteam_deprotectItmc(TagID tag) {
     ItmcDependencies itmc = *( ItmcDependencies *)translatePointer(tagArray[tag.tagTableIndex].dataOffset);
-    zteam_changeTagClass(tag,"cmti");
+    zteam_changeTagClass(tag,ITMC);
     ItmcPermutationDependencies *itmcPerm = ( ItmcPermutationDependencies *)translatePointer(itmc.permutation.offset);
     for(uint32_t i=0;i<itmc.permutation.count;i++) {
         zteam_deprotectObjectTag(itmcPerm[i].tagDependency.tagId);
@@ -235,13 +316,13 @@ static void *translateCustomPointer(uint32_t pointer, uint32_t customMagic, uint
         return translatePointer(pointer);
     }
     else
-    return mapdata + offset + (pointer - customMagic);
+        return mapdata + offset + (pointer - customMagic);
 }
 
 static void zteam_deprotectSBSP(TagID tagId,uint32_t fileOffset, uint32_t bspMagic) {
     if(tagId.tagTableIndex == 0xFFFF)
-    return;
-    zteam_changeTagClass(tagId, "psbs");
+        return;
+    zteam_changeTagClass(tagId, SBSP);
     SBSPDependencies sbsp = *( SBSPDependencies *)(mapdata + fileOffset);
     SBSPCollisionMaterialsDependencies *materials = ( SBSPCollisionMaterialsDependencies *)translateCustomPointer(sbsp.collMaterials.offset,bspMagic,fileOffset);
     for(uint32_t i=0;i<sbsp.collMaterials.count;i++) {
@@ -259,17 +340,14 @@ static void zteam_deprotectSBSP(TagID tagId,uint32_t fileOffset, uint32_t bspMag
 static bool classCanBeDeprotected(uint32_t class) {
     
     uint32_t tagClasses[] = {
-        *(uint32_t *)&"aLeD",
-        *(uint32_t *)&"cved",
-        *(uint32_t *)&"aLeD",
-        *(uint32_t *)&"ghud",
-        *(uint32_t *)&"aLeD",
-        *(uint32_t *)&"gtam",
-        *(uint32_t *)&"aLeD",
-        *(uint32_t *)&"!dns",
-        *(uint32_t *)&"luoS",
-        *(uint32_t *)&"cgat",
-        *(uint32_t *)&"rtsu"
+        *(uint32_t *)&DEVC,
+        *(uint32_t *)&HUDG,
+        *(uint32_t *)&MATG,
+        *(uint32_t *)&DELA,
+        *(uint32_t *)&SND,
+        *(uint32_t *)&SOUL,
+        *(uint32_t *)&TAGC,
+        *(uint32_t *)&USTR
     };
     for(int i=0;i<sizeof(tagClasses)/4;i++) {
         if(class == tagClasses[i]) return false;
@@ -279,11 +357,11 @@ static bool classCanBeDeprotected(uint32_t class) {
 
 static bool classAutogeneric(uint32_t class) {
     uint32_t tagClasses[] = {
-        *(uint32_t *)&"mtib",
-        *(uint32_t *)&"psbs",
-        *(uint32_t *)&"rncs",
-        *(uint32_t *)&"cmti",
-        *(uint32_t *)&"tnof"
+        *(uint32_t *)&BITM,
+        *(uint32_t *)&SBSP,
+        *(uint32_t *)&SCNR,
+        *(uint32_t *)&ITMC,
+        *(uint32_t *)&FONT
     };
     for(int i=0;i<sizeof(tagClasses)/4;i++) {
         if(class == tagClasses[i]) return true;
@@ -318,7 +396,7 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
         }
         
         if(strncmp(translatePointer(tagArray[i].nameOffset),"ui\\",0x3) == 0)
-        continue;
+            continue;
         
         bool automaticallyGeneric = classAutogeneric(tagArray[i].classA);
         
@@ -336,7 +414,7 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
         }
         
         if(!deprotected)
-        sprintf(names + namesLength, "deathstar\\tag_%u", i);
+            sprintf(names + namesLength, "deathstar\\tag_%u", i);
         
         int newname_length = (int)strlen(names + namesLength);
         
@@ -393,7 +471,7 @@ MapData zteam_deprotect(MapData map)
     MapTag scenarioTag = tagArray[index->scenarioTag.tagTableIndex];
     deprotectedTags[deprotectedTagsCount] = scenarioTag.identity;
     deprotectedTagsCount++;
-    zteam_changeTagClass(index->scenarioTag,"rncs");
+    zteam_changeTagClass(index->scenarioTag, SCNR);
     
     ScnrDependencies scnrData = *( ScnrDependencies *)translatePointer(scenarioTag.dataOffset);
     
@@ -409,7 +487,7 @@ MapData zteam_deprotect(MapData map)
     
     ScnrSkies *skies = ( ScnrSkies *)translatePointer(scnrData.skies.offset);
     for(uint32_t i=0;i<scnrData.skies.count;i++) {
-        zteam_changeTagClass(skies[i].sky.tagId, " yks");
+        zteam_changeTagClass(skies[i].sky.tagId, SKY);
     }
     
     ScnrBSPs *bsps = ( ScnrBSPs *)translatePointer(scnrData.BSPs.offset);
@@ -428,7 +506,7 @@ MapData zteam_deprotect(MapData map)
     for(int i=0;i<tagCount;i++) {
         char *name = translatePointer(tagArray[i].nameOffset);
         uint32_t class = tagArray[i].classA;
-        if(class == *(uint32_t *)&"gtam" && strcmp(name,"globals\\globals") == 0) {
+        if(class == *(uint32_t *)&MATG && strcmp(name,"globals\\globals") == 0) {
             matgTag = tagArray[i].identity;
             break;
         }
