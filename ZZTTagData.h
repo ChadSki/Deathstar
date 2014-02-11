@@ -20,6 +20,37 @@
 #ifndef deathstar_ZZTTagData_h
 #define deathstar_ZZTTagData_h
 
+#define BITM "mtib"
+#define ANTR "rtna"
+#define COLL "lloc"
+#define MOD2 "2dom"
+#define PHYS "syhp"
+#define ITMC "cmti"
+#define SCNR "rncs"
+#define SKY  " yks"
+#define MATG "gtam"
+#define SBSP "psbs"
+#define FONT "tnof"
+#define USTR "rtsu"
+#define TAGC "cgat"
+#define SOUL "luoS"
+#define SND  "!dns"
+#define DELA "aLeD"
+#define DEVC "cved"
+#define HUDG "gduh"
+#define SHDR "rdhs"
+#define SOSO "osos"
+#define SCEX "xecs"
+#define SMET "tems"
+#define SCHI "ihcs"
+#define SPLA "alps"
+#define SOTR "rtos"
+#define SWAT "taws"
+#define SGLA "algs"
+#define SENV "vnes"
+#define LENS "snel"
+
+
 typedef struct {
     uint16_t tagTableIndex;
     uint16_t tableIndex;
@@ -319,7 +350,6 @@ typedef struct {
     char padding1[0x2C];         //0xC8
 } __attribute__((packed)) MatgPlayerInformationDependencies; //0xF4
 
-
 typedef struct {
     Dependency flag;             //0x0   weap <--
     Dependency unit;             //0x10  unit <--
@@ -347,5 +377,111 @@ typedef struct {
     TagReflexive fallingDamage;  //0x188 --incomplete
     TagReflexive materials;      //0x194 --incomplete
 } __attribute__((packed)) MatgDependencies;
+
+typedef struct {
+    char padding[0xA4]; //0x0
+    Dependency baseMap; //0xA4
+    char padding1[0x8]; //0xB4
+    Dependency multiMap; //0xBC
+    char padding2[0x10]; //0xCC
+    Dependency detailMap; //0xDC
+    char padding3[0x78]; //0xEC
+    Dependency reflectMap; //0x164
+} __attribute__((packed)) ShaderSosoDependencies;
+
+typedef struct {
+    char padding[0xD4]; //0x0
+    Dependency primaryNoiseMap; //0xD4
+    char padding1[0x38]; //0xE4
+    Dependency secondaryNoiseMap; //0x114
+} __attribute__((packed)) ShaderSplaDependencies;
+
+typedef struct {
+    Dependency shader; //0x0
+} __attribute__((packed)) ShaderShaderLayersDependencies;
+
+typedef struct {
+    char padding[0x1C]; //0x0
+    Dependency map; //0x1C
+    char padding1[0x38]; //0x2C
+} __attribute__((packed)) ShaderSotrMapDependencies;
+
+typedef struct {
+    char padding[0x38]; //0x0
+    Dependency lensflare; //0x38
+    TagReflexive layers; //0x48
+    TagReflexive maps; //0x54
+} __attribute__((packed)) ShaderSotrDependencies;
+
+typedef struct {
+    char padding[0x4C]; //0x0
+    Dependency map; //0x4C
+} __attribute__((packed)) ShaderSmetDependencies;
+
+typedef struct {
+    char padding[0x6C]; //0x0
+    Dependency map; //0x6C
+    char padding1[0x60]; //0x7C
+} __attribute__((packed)) ShaderSchiMapDependencies;
+
+typedef struct {
+    char padding[0x38]; //0x0
+    Dependency lensflare; //0x38
+    TagReflexive layers; //0x48
+    TagReflexive maps; //0x54
+} __attribute__((packed)) ShaderSchiDependencies;
+
+typedef struct {
+    char padding[0x30]; //0x0
+    Dependency lensFlare; //0x30
+    char padding1[0x48]; //0x40
+    Dependency baseMap; //0x88
+    char padding2[0x20]; //0x98
+    Dependency primaryDetailMap; //0xB8
+    char padding3[0x4]; //0xC8
+    Dependency secondaryDetailMap; //0xCC
+    char padding4[0x20]; //0xDC
+    Dependency microDetailMap; //0xFC
+    char padding5[0x1C]; //0x10C
+    Dependency bumpMap; //0x128
+    char padding6[0x11C]; //0x138
+    Dependency illuminationMap; //0x254
+    char padding7[0xC0]; //0x264
+    Dependency reflectionCubeMap; //0x324
+} __attribute__((packed)) ShaderSenvDependencies;
+
+typedef struct {
+    char padding[0x38]; //0x0
+    Dependency lensflare; //0x38
+    TagReflexive layers; //0x48
+    TagReflexive stage4maps; //0x54
+    TagReflexive stage2maps; //0x60
+} __attribute__((packed)) ShaderScexDependencies;
+
+typedef struct {
+    char padding[0x4C]; //0x0
+    Dependency baseMap; //0x4C
+    char padding1[0x40]; //0x5C
+    Dependency reflectionMap; //0x9C
+    char padding2[0x1C]; //0xAC
+    Dependency rippleMap; //0xC8
+} __attribute__((packed)) ShaderSwatDependencies;
+
+typedef struct {
+    char padding[0x64]; //0x0
+    Dependency bgTint; //0x64
+    char padding1[0x38]; //0x74
+    Dependency reflectionMap; //0xAC
+    float padding2; //0xBC
+    Dependency bumpMap; //0xC0
+    char padding3[0x88]; //0xD0
+    Dependency diffuseMap; //0x158
+    float padding4; //0x168
+    Dependency diffuseDetailMap; //0x16C
+    char padding5[0x24]; //0x17C
+    Dependency specularMap; //0x190
+    float padding6; //0x1B0
+    Dependency specularDetailMap; //0x1B4
+} __attribute__((packed)) ShaderSglaDependencies;
 
 #endif
