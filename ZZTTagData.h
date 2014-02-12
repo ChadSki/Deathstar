@@ -52,6 +52,7 @@
 #define JPT  "!tpj"
 #define EFFE "effe"
 #define ACTV "vtca"
+#define LIGH "hgil"
 
 
 typedef struct {

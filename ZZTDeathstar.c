@@ -288,18 +288,18 @@ static void zteam_deprotectObjectTag(TagID tagId) {
             zteam_deprotectObjectTag(triggers[i].projectile.tagId);
         }
     }
-    if(object.tagObjectType == OBJECT_PROJ) {
-        ProjDependencies proj = *(ProjDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-        zteam_changeTagClass(proj.superDetonation.tagId, EFFE);
-    }
+    
     if(object.tagObjectType == OBJECT_VEHI || object.tagObjectType == OBJECT_BIPD) {
         UnitDependencies unit = *( UnitDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
         UnitWeaponDependencies *weapons = ( UnitWeaponDependencies *)translatePointer(unit.weapons.offset);
         for(uint32_t i=0;i<unit.weapons.count;i++) {
             zteam_deprotectObjectTag(weapons[i].weapon.tagId);
         }
-        zteam_changeTagClass(unit.meleeDamage.tagId, JPT);
-        zteam_changeTagClass(unit.spawnedActor.tagId, ACTV);
+    }
+    
+    if(object.tagObjectType == OBJECT_PROJ) {
+        ProjDependencies proj = *(ProjDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+        zteam_changeTagClass(proj.superDetonation.tagId, EFFE);
     }
 }
 
