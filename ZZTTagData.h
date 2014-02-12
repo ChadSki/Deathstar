@@ -49,6 +49,9 @@
 #define SGLA "algs"
 #define SENV "vnes"
 #define LENS "snel"
+#define JPT  "!tpj"
+#define EFFE "effe"
+#define ACTV "vtca"
 
 
 typedef struct {
@@ -164,6 +167,17 @@ typedef struct {
     TagReflexive firingEffect;   //0x108
 } __attribute__((packed)) WeapTriggerDependencies; //0x114
 
+enum ResourceType {
+    OBJE_TYPE_BITMAP = 0,
+    OBJE_TYPE_SOUND = 1
+};
+
+typedef struct {
+    uint16_t type; //0x0
+    char padding[0x2]; //0x2
+    TagID name; //0x4
+} __attribute__((packed)) ObjeResources; //0x8
+
 typedef struct {
     uint16_t tagObjectType;      //0x0
     char padding[0x26];          //0x2
@@ -174,7 +188,8 @@ typedef struct {
     Dependency physics;          //0x80 phys
     Dependency shader;           //0x90 shdr
     Dependency creationEffect;   //0xA0 effe
-    char padding3[0xCC];         //0xB0
+    char padding3[0xC0];         //0xB0
+    TagReflexive resources;      //0x140
 } __attribute__((packed)) ObjeDependencies; //0x17C
 typedef struct {
     ObjeDependencies obje;       //0x0
