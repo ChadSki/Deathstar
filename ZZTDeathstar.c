@@ -59,7 +59,7 @@ typedef enum {
     SHADER_SPLA = 0xB
 } TagShaderType; //0x24
 
-bool *deprotectedTags;
+bool *deprotectedTags; //check for CERTAIN tags
 
 MapTag *tagArray;
 uint32_t tagCount;
@@ -231,6 +231,13 @@ static void zteam_deprotectMod2(TagID tagId) {
     }
 }
 
+static void zteam_deprotectEffe(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, EFFE);
+    deprotectedTags[tagId.tagTableIndex] = true;
+}
+
 static void zteam_deprotectObjectTag(TagID tagId) {
     if(isNulledOut(tagId)) return;
     
@@ -257,7 +264,6 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     {
         return; //failed to ID tag
     }
-    
     
     zteam_changeTagClass(tagId,(const char *)&tagClasses[object.tagObjectType]);
     
@@ -295,11 +301,23 @@ static void zteam_deprotectObjectTag(TagID tagId) {
         for(uint32_t i=0;i<unit.weapons.count;i++) {
             zteam_deprotectObjectTag(weapons[i].weapon.tagId);
         }
+        zteam_changeTagClass(unit.integratedLight.tagId,LIGH);
+        zteam_changeTagClass(unit.meleeDamage.tagId, JPT);
+        zteam_changeTagClass(unit.spawnedActor.tagId, ACTV);
     }
     
     if(object.tagObjectType == OBJECT_PROJ) {
         ProjDependencies proj = *(ProjDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-        zteam_changeTagClass(proj.superDetonation.tagId, EFFE);
+        zteam_deprotectEffe(proj.superDetonation.tagId);
+        zteam_deprotectEffe(proj.detonationEffect.tagId);
+        zteam_changeTagClass(proj.attachedDamage.tagId, JPT);
+        zteam_changeTagClass(proj.impactDamage.tagId, JPT);
+        ProjMaterialResponseDependencies *respond = (ProjMaterialResponseDependencies *)translatePointer(proj.materialRespond.offset);
+        for(uint32_t i=0;i<proj.materialRespond.count;i++) {
+            zteam_deprotectEffe(respond[i].defaultResult.tagId);
+            zteam_deprotectEffe(respond[i].detonationEffect.tagId);
+            zteam_deprotectEffe(respond[i].potentialResult.tagId);
+        }
     }
 }
 

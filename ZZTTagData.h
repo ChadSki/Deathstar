@@ -53,6 +53,7 @@
 #define EFFE "effe"
 #define ACTV "vtca"
 #define LIGH "hgil"
+#define UNHI "ihnu"
 
 
 typedef struct {
@@ -224,9 +225,27 @@ typedef struct {
     TagReflexive weapons;        //0x2D8
 } __attribute__((packed)) UnitDependencies;
 typedef struct {
+    char padding[0x4];           //0x0
+    Dependency defaultResult;    //0x4   effe
+    char padding1[0x28];         //0x14
+    Dependency potentialResult;  //0x3C  effe
+    char padding2[0x1C];         //0x4C  effe
+    Dependency detonationEffect; //0x68  effe
+    char padding3[0x28];         //0x78
+} __attribute__((packed)) ProjMaterialResponseDependencies;
+typedef struct {
     ObjeDependencies obje;       //0x0
     char padding[0x10];          //0x17C
     Dependency superDetonation;  //0x18C effe
+    char padding1[0x10];         //0x19C
+    Dependency detonationEffect; //0x1AC effe
+    char padding2[0x38];         //0x1BC
+    Dependency detonationStarted;//0x1F4 effe
+    Dependency flybySound;       //0x204 effe
+    Dependency attachedDamage;   //0x214 jpt!
+    Dependency impactDamage;     //0x224 jpt!
+    char padding3[0xC];          //0x234
+    TagReflexive materialRespond;//0x240 effe's
 } __attribute__((packed)) ProjDependencies; //incomplete
 typedef struct {
     ItemDependencies item;       //0x0
@@ -256,6 +275,7 @@ typedef struct {
 } __attribute__((packed)) WeapDependencies; //0x508
 typedef struct {
     char padding[0x24];
+    Dependency dependency;
     char padding1[0x20];
 } __attribute__((packed)) ItmcPermutationDependencies;
 typedef struct {
@@ -265,9 +285,11 @@ typedef struct {
     Dependency sky;              //0x0
 } __attribute__((packed)) ScnrSkies; //0x10
 typedef struct {
+    Dependency shader;           //0x0
     uint32_t type;               //0x10
 } __attribute__((packed)) SBSPCollisionMaterialsDependencies;
 typedef struct {
+    Dependency shader;           //0x0
     char padding[0xF0];          //0x10
 } __attribute__((packed)) SBSPLightmapsMaterialsReflexives;
 typedef struct {
