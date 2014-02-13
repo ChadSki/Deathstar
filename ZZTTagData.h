@@ -72,13 +72,6 @@ typedef struct {
 } __attribute__((packed)) TagReflexive;
 
 typedef struct {
-    char className[4];
-    uint32_t metaIndex;
-    uint32_t zero;
-    TagID identity;
-} __attribute__((packed)) TagDependency;
-
-typedef struct {
 	uint32_t integrityHead;
 	uint32_t version;
 	uint32_t length;
@@ -263,7 +256,6 @@ typedef struct {
 } __attribute__((packed)) WeapDependencies; //0x508
 typedef struct {
     char padding[0x24];
-    Dependency tagDependency;
     char padding1[0x20];
 } __attribute__((packed)) ItmcPermutationDependencies;
 typedef struct {
@@ -273,11 +265,9 @@ typedef struct {
     Dependency sky;              //0x0
 } __attribute__((packed)) ScnrSkies; //0x10
 typedef struct {
-    TagDependency shader;        //0x0
     uint32_t type;               //0x10
 } __attribute__((packed)) SBSPCollisionMaterialsDependencies;
 typedef struct {
-    TagDependency shader;        //0x0
     char padding[0xF0];          //0x10
 } __attribute__((packed)) SBSPLightmapsMaterialsReflexives;
 typedef struct {

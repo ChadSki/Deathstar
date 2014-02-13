@@ -322,7 +322,7 @@ static void zteam_deprotectItmc(TagID tag) {
     zteam_changeTagClass(tag,ITMC);
     ItmcPermutationDependencies *itmcPerm = ( ItmcPermutationDependencies *)translatePointer(itmc.permutation.offset);
     for(uint32_t i=0;i<itmc.permutation.count;i++) {
-        zteam_deprotectObjectTag(itmcPerm[i].tagDependency.tagId);
+        zteam_deprotectObjectTag(itmcPerm[i].dependency.tagId);
     }
 }
 
@@ -339,13 +339,13 @@ static void zteam_deprotectSBSP(TagID tagId,uint32_t fileOffset, uint32_t bspMag
     SBSPDependencies sbsp = *( SBSPDependencies *)(mapdata + fileOffset);
     SBSPCollisionMaterialsDependencies *materials = ( SBSPCollisionMaterialsDependencies *)translateCustomPointer(sbsp.collMaterials.offset,bspMagic,fileOffset);
     for(uint32_t i=0;i<sbsp.collMaterials.count;i++) {
-        zteam_deprotectShdr(materials[i].shader.identity);
+        zteam_deprotectShdr(materials[i].shader.tagId);
     }
     SBSPLightmapsDependencies *lightmaps = ( SBSPLightmapsDependencies *)translateCustomPointer(sbsp.lightmaps.offset,bspMagic,fileOffset);
     for(uint32_t i=0;i<sbsp.lightmaps.count;i++) {
         SBSPLightmapsMaterialsReflexives *materials = ( SBSPLightmapsMaterialsReflexives *)translateCustomPointer(lightmaps[i].materials.offset, bspMagic, fileOffset);
         for(uint32_t q=0;q<lightmaps[i].materials.count;q++) {
-            zteam_deprotectShdr(materials[q].shader.identity);
+            zteam_deprotectShdr(materials[q].shader.tagId);
         }
     }
 }
