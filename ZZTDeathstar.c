@@ -401,13 +401,18 @@ static bool classAutogeneric(uint32_t class) {
 }
 
 #define MATCHING_THRESHOLD 0.7
+#define MAX_TAG_NAME_SIZE 0x20
 
 MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     uint32_t length = map.length;
-    char *map_buffer = map.buffer;
     
-    char *modded_buffer = malloc(length);
-    memcpy(modded_buffer,map_buffer,length);
+    HaloMapHeader *headerOldMap = ( HaloMapHeader *)(map.buffer);
+    HaloMapIndex *indexOldMap = (HaloMapIndex *)(map.buffer + headerOldMap->indexOffset);
+    tagCount = indexOldMap->tagCount;
+    
+    char *modded_buffer = calloc(map.length + MAX_TAG_NAME_SIZE * tagCount,0x1);
+    
+    memcpy(modded_buffer,map.buffer,length);
     
     HaloMapHeader *header = ( HaloMapHeader *)(modded_buffer);
     HaloMapIndex *index = ( HaloMapIndex *)(modded_buffer + header->indexOffset);
@@ -415,7 +420,7 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     mapdata = modded_buffer;
     magic = META_MEMORY_OFFSET - header->indexOffset;
     
-    char *names = calloc(0x20 * index->tagCount,0x1);
+    char *names = modded_buffer + length;
     int namesLength = 0x0;
     
     tagArray = ( MapTag *)(translatePointer(index->tagIndexOffset));
@@ -459,14 +464,8 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     header->length = new_length;
     header->metaSize = new_length - header->indexOffset;
     
-    char *new_buffer = calloc(length + namesLength,0x1);
-    memcpy(new_buffer, modded_buffer, length);
-    memcpy(new_buffer + length, names, namesLength);
-    
-    free(modded_buffer);
-    
     MapData new_map;
-    new_map.buffer = new_buffer;
+    new_map.buffer = modded_buffer;
     new_map.length = new_length;
     new_map.error = MAP_OK;
     
