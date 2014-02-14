@@ -493,7 +493,7 @@ MapData zteam_deprotect(MapData map)
     tagArray = ( MapTag *)(translatePointer(index->tagIndexOffset));
     tagCount = index->tagCount;
     
-    deprotectedTags = calloc(sizeof(bool),0x1);
+    deprotectedTags = calloc(sizeof(bool) * tagCount,0x1);
     
     mapdataSize = length;
     tagdataSize = length - header->indexOffset;
