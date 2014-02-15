@@ -95,10 +95,14 @@ MapData openMapAtPath(const char *path) {
     return mapData;
 }
 
-void saveMap(const char *path, MapData map) {
+int saveMap(const char *path, MapData map) {
     FILE *mapFile = fopen(path,"wb");
-    fwrite(map.buffer,1,map.length,mapFile);
-    fclose(mapFile);
+    if(mapFile) {
+        fwrite(map.buffer,1,map.length,mapFile);
+        fclose(mapFile);
+        return 0;
+    }
+    return 1;
 }
 
 static bool isNulledOut(TagID tag) {
