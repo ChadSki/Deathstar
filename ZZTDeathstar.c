@@ -530,6 +530,7 @@ static bool classCanBeDeprotected(uint32_t class) {
 static bool classAutogeneric(uint32_t class) {
     uint32_t tagClasses[] = {
         *(uint32_t *)&BITM,
+        *(uint32_t *)&SND,
         *(uint32_t *)&SBSP,
         *(uint32_t *)&SCNR,
         *(uint32_t *)&ITMC,
@@ -572,7 +573,9 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
             continue;
         }
         
-        if(strncmp(translatePointer(tagArray[i].nameOffset),"ui\\",0x3) == 0)
+        if(strncmp(translatePointer(tagArray[i].nameOffset),"ui\\",3) == 0)
+            continue;
+        if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
             continue;
         
         bool automaticallyGeneric = classAutogeneric(tagArray[i].classA);
