@@ -290,6 +290,45 @@ static void zteam_deprotectFoot(TagID tagId) {
         }
     }
 }
+
+static inline void zteam_deprotectUnhiMultitextureOverlay(TagReflexive reflexive) {
+    UnhiMultitextureOverlay *overlay = (UnhiMultitextureOverlay *)translatePointer(reflexive.offset);
+    for(uint32_t i=0;i<reflexive.count;i++) {
+        zteam_changeTagClass(overlay[i].mapPrimary.tagId, BITM);
+        zteam_changeTagClass(overlay[i].mapSecondary.tagId, BITM);
+        zteam_changeTagClass(overlay[i].mapTertiary.tagId,BITM);
+    }
+}
+
+static void zteam_deprotectUnhi(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, UNHI);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    UnhiDependencies unhi = *(UnhiDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_deprotectUnhiMultitextureOverlay(unhi.auxOverlayMulitextureOverlay);
+    zteam_deprotectUnhiMultitextureOverlay(unhi.healthBigMultitextureOverlay);
+    zteam_deprotectUnhiMultitextureOverlay(unhi.hudBgMultitextureOverlay);
+    zteam_deprotectUnhiMultitextureOverlay(unhi.motionSensorBgMultitextureOverlay);
+    zteam_deprotectUnhiMultitextureOverlay(unhi.motionSensorFgMultitextureOverlay);
+    zteam_deprotectUnhiMultitextureOverlay(unhi.shieldBgMultitextureOverlay);
+    zteam_changeTagClass(unhi.healthInterfaceBitmap.tagId, BITM);
+    zteam_changeTagClass(unhi.healthMeterBitmap.tagId, BITM);
+    zteam_changeTagClass(unhi.hudinterfaceBitmap.tagId, BITM);
+    zteam_changeTagClass(unhi.motionSensorBgInterfaceBitmap.tagId, BITM);
+    zteam_changeTagClass(unhi.motionSensorFgInterfaceBitmap.tagId, BITM);
+    zteam_changeTagClass(unhi.shieldInterfaceBitmap.tagId, BITM);
+    zteam_changeTagClass(unhi.shieldMeterBitmap.tagId, BITM);
+    UnhiHudMetersDependencies *meters = translatePointer(unhi.auxHudMeters.offset);
+    for(uint32_t i=0;i<unhi.auxHudMeters.count;i++) {
+        zteam_changeTagClass(meters[i].interfaceBitmap.tagId, BITM);
+        zteam_changeTagClass(meters[i].meterBitmap.tagId, BITM);
+    }
+    UnhiHudWarningSoundsDependencies *sounds = translatePointer(unhi.hudWarningSounds.offset);
+    for(uint32_t i=0;i<unhi.hudWarningSounds.count;i++) {
+        zteam_changeTagClass(sounds[i].sound.tagId, SND);
+    }
+}
 static void zteam_deprotectObjectTag(TagID tagId) {
     if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
@@ -397,8 +436,16 @@ static void zteam_deprotectObjectTag(TagID tagId) {
             }
             UnitSeatHudInterface *unhi = translatePointer(seats[i].unhi.offset);
             for(uint32_t umhi = 0;umhi < seats[i].unhi.count;umhi++) {
-                zteam_changeTagClass(unhi[umhi].hud.tagId, UNHI);
+                zteam_deprotectUnhi(unhi[umhi].hud.tagId);
             }
+        }
+        //UnitDialogues *dialogues = translatePointer(unit.unitDialogue.offset);
+        for(uint32_t i=0;i<unit.unitDialogue.count;i++) {
+            
+        }
+        UnitNewHUDDependencies *unhis = translatePointer(unit.unitHud.offset);
+        for(uint32_t i=0;i<unit.unitHud.count;i++) {
+            zteam_deprotectUnhi(unhis[i].unhi.tagId);
         }
     }
     
@@ -516,7 +563,6 @@ static bool classCanBeDeprotected(uint32_t class) {
         *(uint32_t *)&HUDG,
         *(uint32_t *)&MATG,
         *(uint32_t *)&DELA,
-        *(uint32_t *)&SND,
         *(uint32_t *)&SOUL,
         *(uint32_t *)&TAGC,
         *(uint32_t *)&USTR

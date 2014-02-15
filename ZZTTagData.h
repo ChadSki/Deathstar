@@ -238,6 +238,14 @@ typedef struct {
     char padding2[0x14];         //0x108
 } __attribute__((packed)) UnitSeatsDependencies;
 typedef struct {
+    Dependency unhi;             //0x0
+    char padding[0x20];          //0x10
+} __attribute__((packed)) UnitNewHUDDependencies; //0x30
+typedef struct {
+    char padding[0x8];           //0x0
+    Dependency dialogue;         //0x8
+} __attribute__((packed)) UnitDialogues; //0x18
+typedef struct {
     ObjeDependencies obje;       //0x0
     char padding[0xC];           //0x17C
     Dependency integratedLight;  //0x188 ligh
@@ -605,5 +613,58 @@ typedef struct {
 typedef struct {
     TagReflexive effects;
 } __attribute__((packed)) FootDependencies;
+
+typedef struct {
+    char padding[0x64]; //0x0
+    Dependency mapPrimary; //0x64
+    Dependency mapSecondary; //0x74
+    Dependency mapTertiary; //0x84
+    char padding1[0x14C]; //0x94
+} __attribute__((packed)) UnhiMultitextureOverlay;
+
+typedef struct {
+    Dependency sound; //0x0
+    char padding[0x28]; //0x10
+} __attribute__((packed)) UnhiHudWarningSoundsDependencies; //0x38
+
+typedef struct {
+    char padding[0x38]; //0x0
+    Dependency interfaceBitmap; //0x38
+    char padding1[0x58]; //0x48
+    Dependency meterBitmap; //0xA0
+    char padding2[0x94];
+} __attribute__((packed)) UnhiHudMetersDependencies;
+
+typedef struct {
+    char padding[0x48]; //0x0
+    Dependency hudinterfaceBitmap; //0x48    bitm
+    char padding1[0x24]; //0x58
+    TagReflexive hudBgMultitextureOverlay; //0x7C
+    char padding2[0x28]; //0x88
+    Dependency shieldInterfaceBitmap; //0xB0 bitm
+    char padding3[0x24]; //0xE4
+    TagReflexive shieldBgMultitextureOverlay; //0xE4
+    char padding4[0x28]; //0xF0
+    Dependency shieldMeterBitmap; //0x118
+    char padding5[0x78]; //0x128
+    Dependency healthInterfaceBitmap; //0x1A0
+    char padding6[0x24]; //0x1B0
+    TagReflexive healthBigMultitextureOverlay; //0x1D4
+    char padding7[0x28]; //0x1E0
+    Dependency healthMeterBitmap; //0x208   bitm
+    char padding8[0x78]; //0x218
+    Dependency motionSensorBgInterfaceBitmap; //0x290
+    char padding9[0x24]; //0x2A0
+    TagReflexive motionSensorBgMultitextureOverlay; //0x2C4
+    char padding10[0x28]; //0x2D0
+    Dependency motionSensorFgInterfaceBitmap; //0x2F8
+    char padding11[0x24]; //0x308
+    TagReflexive motionSensorFgMultitextureOverlay; //0x32C
+    char padding12[0x6C]; //0x338
+    TagReflexive auxOverlayMulitextureOverlay; //0x3A4
+    char padding13[0x10]; //0x3B0
+    TagReflexive hudWarningSounds; //0x3C0
+    TagReflexive auxHudMeters; //0x3CC
+} __attribute__((packed)) UnhiDependencies;
 
 #endif
