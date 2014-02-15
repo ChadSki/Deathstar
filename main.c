@@ -26,7 +26,7 @@
 
 #include "ZZTDeathstar.h"
 
-#define PROG_VERSION "Deathstar 1.0a2"
+#define PROG_VERSION "Deathstar 1.0a3"
 #define PROG_CREATED "9th January, 2014"
 typedef enum {
     false = 0,
@@ -116,8 +116,10 @@ int main(int argc, const char * argv[])
             }
             
             MapData final_map = name_deprotect(map, maps, argc - 3);
-            saveMap(argv[2], final_map);
-            printf("Completed. Map has been saved!\n");
+            if(saveMap(argv[2], final_map) == 0)
+                printf("Completed. Map has been saved!\n");
+            else
+                printf("Failed to save map. It might be read-only.\n");
         }
         
     }
@@ -137,7 +139,6 @@ int main(int argc, const char * argv[])
                 printf("Failed to open map. Path is valid, but map isn't.\n");
                 return 0;
             }
-            
             MapData zteam_map = zteam_deprotect(map);
             
             free(map.buffer);
@@ -150,9 +151,10 @@ int main(int argc, const char * argv[])
             
             MapData final_map = name_deprotect(zteam_map, maps, argc - 3);
             
-            saveMap(argv[2], final_map);
-            
-            printf("Completed. Map has been saved!\n");
+            if(saveMap(argv[2], final_map) == 0)
+                printf("Completed. Map has been saved!\n");
+            else
+                printf("Failed to save map. It might be read-only.\n");
         }
         return 0;
     }
@@ -173,8 +175,10 @@ int main(int argc, const char * argv[])
                 return 0;
             }
             MapData final_map = zteam_deprotect(map);
-            saveMap(argv[2], final_map);
-            printf("Completed. Map has been saved!\n");
+            if(saveMap(argv[2], final_map) == 0)
+                printf("Completed. Map has been saved!\n");
+            else
+                printf("Failed to save map. It might be read-only.\n");
         }
         return 0;
     }

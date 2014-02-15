@@ -39,7 +39,7 @@ typedef struct {
 
 
 MapData openMapAtPath(const char *path);
-void saveMap(const char *path, MapData map);
+int saveMap(const char *path, MapData map);
 MapData zteam_deprotect(MapData map);
 MapData name_deprotect(MapData map, MapData *maps, int map_count);
 
