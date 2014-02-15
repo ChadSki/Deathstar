@@ -54,6 +54,10 @@
 #define ACTV "vtca"
 #define LIGH "hgil"
 #define UNHI "ihnu"
+#define PART "trap"
+#define PPHY "yhpp"
+#define TRAK "kart"
+#define FOOT "toof"
 
 
 typedef struct {
@@ -162,17 +166,23 @@ typedef struct {
     TagReflexive firingEffect;   //0x108
 } __attribute__((packed)) WeapTriggerDependencies; //0x114
 
+typedef struct {
+    Dependency name;
+    char padding[0x10];
+} __attribute__((packed)) ObjeWidgets; //0x20
+typedef struct {
+    Dependency type;
+    char padding[0x38];
+} __attribute__((packed)) ObjeAttachments; //0x48
 enum ResourceType {
     OBJE_TYPE_BITMAP = 0,
     OBJE_TYPE_SOUND = 1
 };
-
 typedef struct {
     uint16_t type; //0x0
     char padding[0x2]; //0x2
     TagID name; //0x4
 } __attribute__((packed)) ObjeResources; //0x8
-
 typedef struct {
     uint16_t tagObjectType;      //0x0
     char padding[0x26];          //0x2
@@ -183,8 +193,11 @@ typedef struct {
     Dependency physics;          //0x80 phys
     Dependency shader;           //0x90 shdr
     Dependency creationEffect;   //0xA0 effe
-    char padding3[0xC0];         //0xB0
-    TagReflexive resources;      //0x140
+    char padding3[0x90];         //0xB0
+    TagReflexive attachments;    //0x140
+    TagReflexive widgets;        //0x14C
+    char padding4[0x18];         //0x158
+    TagReflexive resources;      //0x170
 } __attribute__((packed)) ObjeDependencies; //0x17C
 typedef struct {
     ObjeDependencies obje;       //0x0
@@ -209,6 +222,22 @@ typedef struct {
     char padding[0x14];          //0x10
 } __attribute__((packed)) UnitWeaponDependencies; //0x24
 typedef struct {
+    Dependency cameraTrack;      //0x0
+    char padding[0xC];           //0x10
+} __attribute__((packed)) UnitSeatCameraTrackDependencies; //0x1C
+typedef struct {
+    Dependency hud;              //0x0
+    char padding[0x20];          //0x10
+} __attribute__((packed)) UnitSeatHudInterface; //0x30
+typedef struct {
+    char padding[0xD0];          //0x0
+    TagReflexive tracks;         //0xD0
+    TagReflexive unhi;           //0xDC
+    char padding1[0x10];         //0xE8
+    Dependency gunner;           //0xF8  actv
+    char padding2[0x14];         //0x108
+} __attribute__((packed)) UnitSeatsDependencies;
+typedef struct {
     ObjeDependencies obje;       //0x0
     char padding[0xC];           //0x17C
     Dependency integratedLight;  //0x188 ligh
@@ -223,7 +252,21 @@ typedef struct {
     TagReflexive unitDialogue;   //0x2B4 -- not done yet
     char padding6[0x18];         //0x2C0
     TagReflexive weapons;        //0x2D8
-} __attribute__((packed)) UnitDependencies;
+    TagReflexive seats;          //0x2E4
+} __attribute__((packed)) UnitDependencies; //0x2F0
+typedef struct {
+    UnitDependencies unit;       //0x0
+    char padding[0xC0];          //0x2F0
+    Dependency suspensionSound;  //0x3B0
+    Dependency crashSound;       //0x3C0
+    Dependency materialEffects;  //0x3D0
+    Dependency effect;           //0x3E0
+} __attribute__((packed)) VehiDependencies;
+typedef struct {
+    UnitDependencies unit;       //0x0
+    char padding[0x9C];          //0x2F0
+    Dependency materialEffects;  //0x38C
+} __attribute__((packed)) BipdDependencies;
 typedef struct {
     char padding[0x4];           //0x0
     Dependency defaultResult;    //0x4   effe
@@ -511,5 +554,56 @@ typedef struct {
     float padding6; //0x1B0
     Dependency specularDetailMap; //0x1B4
 } __attribute__((packed)) ShaderSglaDependencies;
+
+typedef struct {
+    char padding[0x54]; //0x0
+    Dependency particle; //0x54
+    char padding1[0x84]; //0x64
+} __attribute__((packed)) EffeEventParticlesDependencies;
+
+typedef struct {
+    char padding[0x14]; //0x0
+    char tagClass[4]; //0x14
+    Dependency type; //0x18
+    char padding1[0x40]; //0x28
+} __attribute__((packed)) EffeEventPartsDependencies; //0x68
+
+typedef struct {
+    char padding[0x2C]; //0x0
+    TagReflexive parts; //0x2C
+    TagReflexive particles; //0x38
+} __attribute__((packed)) EffeEvents; //0x44
+
+typedef struct {
+    char padding[0x34];
+    TagReflexive events;
+} __attribute__((packed)) EffeDependencies;
+
+typedef struct {
+    char padding[0x4]; //0x0
+    Dependency bitmap; //0x4                bitm
+    Dependency physics; //0x14              pphy
+    Dependency materialEffects; //0x24      foot
+    char padding1[0x14]; //0x34
+    Dependency collisionEffect; //0x48      effe
+    Dependency deathEffect; //0x58          effe
+    char padding2[0x94]; //0x68
+    Dependency secondaryBitmap; //FC        bitm
+} __attribute__((packed)) PartDependencies;
+
+typedef struct {
+    Dependency effect; //0x0                effe
+    Dependency sound; //0x10                snd!
+    char padding[0x10];
+} __attribute__((packed)) FootEffectsMaterials;
+
+typedef struct {
+    TagReflexive materials;
+    char padding[0x10];
+} __attribute__((packed)) FootEffects;
+
+typedef struct {
+    TagReflexive effects;
+} __attribute__((packed)) FootDependencies;
 
 #endif
