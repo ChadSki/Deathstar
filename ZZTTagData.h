@@ -58,6 +58,7 @@
 #define PPHY "yhpp"
 #define TRAK "kart"
 #define FOOT "toof"
+#define LSND "dnsl"
 
 
 typedef struct {

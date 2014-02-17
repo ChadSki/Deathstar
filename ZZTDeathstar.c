@@ -250,8 +250,8 @@ static void zteam_deprotectPart(TagID tagId) {
     zteam_changeTagClass(part.bitmap.tagId, BITM);
     zteam_changeTagClass(part.physics.tagId, PPHY);
     zteam_changeTagClass(part.secondaryBitmap.tagId, BITM);
-    zteam_deprotectEffe(part.collisionEffect.tagId);
-    zteam_deprotectEffe(part.deathEffect.tagId);
+    zteam_deprotectClass(part.collisionEffect.tagId,part.collisionEffect.mainClass);
+    zteam_deprotectClass(part.deathEffect.tagId,part.deathEffect.mainClass);
     zteam_deprotectFoot(part.materialEffects.tagId);
 }
 
@@ -285,7 +285,7 @@ static void zteam_deprotectFoot(TagID tagId) {
     {
         FootEffectsMaterials *materials = translatePointer(effects[effect].materials.offset);
         for(uint32_t material = 0; material < effects[effect].materials.count;material++) {
-            zteam_deprotectEffe(materials[material].effect.tagId);
+            zteam_deprotectClass(materials[material].effect.tagId,materials[material].effect.mainClass);
             zteam_changeTagClass(materials[material].sound.tagId, SND);
         }
     }
@@ -326,7 +326,7 @@ static void zteam_deprotectUnhi(TagID tagId) {
     }
     UnhiHudWarningSoundsDependencies *sounds = translatePointer(unhi.hudWarningSounds.offset);
     for(uint32_t i=0;i<unhi.hudWarningSounds.count;i++) {
-        zteam_changeTagClass(sounds[i].sound.tagId, SND);
+        zteam_changeTagClass(sounds[i].sound.tagId, sounds[i].sound.mainClass);
     }
 }
 static void zteam_deprotectObjectTag(TagID tagId) {
@@ -395,19 +395,19 @@ static void zteam_deprotectObjectTag(TagID tagId) {
             zteam_deprotectClass(triggers[i].chargingEffect.tagId, triggers[i].chargingEffect.mainClass);
             WeapTriggerFiringEffects *firingEffects = translatePointer(triggers[i].firingEffect.offset);
             for(uint32_t fire=0;fire<triggers[i].firingEffect.count;fire++) {
-                zteam_deprotectEffe(firingEffects[fire].emptyEffect.tagId);
-                zteam_deprotectEffe(firingEffects[fire].firingEffect.tagId);
-                zteam_deprotectEffe(firingEffects[fire].misfireEffect.tagId);
+                zteam_deprotectClass(firingEffects[fire].emptyEffect.tagId,firingEffects[fire].emptyEffect.mainClass);
+                zteam_deprotectClass(firingEffects[fire].firingEffect.tagId,firingEffects[fire].firingEffect.mainClass);
+                zteam_deprotectClass(firingEffects[fire].misfireEffect.tagId,firingEffects[fire].misfireEffect.mainClass);
                 zteam_changeTagClass(firingEffects[fire].misfireDamage.tagId, JPT);
                 zteam_changeTagClass(firingEffects[fire].emptyDamage.tagId, JPT);
                 zteam_changeTagClass(firingEffects[fire].firingDamage.tagId, JPT);
             }
         }
-        zteam_deprotectEffe(weap.detonationEffect.tagId);
-        zteam_deprotectEffe(weap.lightOffEffect.tagId);
-        zteam_deprotectEffe(weap.lightOnEffect.tagId);
-        zteam_deprotectEffe(weap.overheatedEffect.tagId);
-        zteam_deprotectEffe(weap.readyEffect.tagId);
+        zteam_deprotectClass(weap.detonationEffect.tagId, weap.detonationEffect.mainClass);
+        zteam_deprotectClass(weap.lightOffEffect.tagId, weap.lightOffEffect.mainClass);
+        zteam_deprotectClass(weap.lightOnEffect.tagId, weap.lightOnEffect.mainClass);
+        zteam_deprotectClass(weap.overheatedEffect.tagId, weap.overheatedEffect.mainClass);
+        zteam_deprotectClass(weap.readyEffect.tagId, weap.readyEffect.mainClass);
         zteam_changeTagClass(weap.meleeDamage.tagId, JPT);
         zteam_changeTagClass(weap.meleeResponse.tagId, JPT);
         zteam_changeTagClass(weap.pickupSound.tagId,SND);
@@ -451,7 +451,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     
     if(object.tagObjectType == OBJECT_VEHI) {
         VehiDependencies vehi = *(VehiDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-        zteam_deprotectEffe(vehi.effect.tagId);
+        zteam_deprotectClass(vehi.effect.tagId,vehi.effect.mainClass);
         zteam_deprotectFoot(vehi.materialEffects.tagId);
         zteam_changeTagClass(vehi.crashSound.tagId, SND);
         zteam_changeTagClass(vehi.suspensionSound.tagId, SND);
@@ -464,15 +464,15 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     
     if(object.tagObjectType == OBJECT_PROJ) {
         ProjDependencies proj = *(ProjDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-        zteam_deprotectEffe(proj.superDetonation.tagId);
-        zteam_deprotectEffe(proj.detonationEffect.tagId);
+        zteam_deprotectClass(proj.superDetonation.tagId, proj.superDetonation.mainClass);
+        zteam_deprotectClass(proj.superDetonation.tagId,proj.superDetonation.mainClass);
         zteam_changeTagClass(proj.attachedDamage.tagId, JPT);
         zteam_changeTagClass(proj.impactDamage.tagId, JPT);
         ProjMaterialResponseDependencies *respond = (ProjMaterialResponseDependencies *)translatePointer(proj.materialRespond.offset);
         for(uint32_t i=0;i<proj.materialRespond.count;i++) {
-            zteam_deprotectEffe(respond[i].defaultResult.tagId);
-            zteam_deprotectEffe(respond[i].detonationEffect.tagId);
-            zteam_deprotectEffe(respond[i].potentialResult.tagId);
+            zteam_deprotectClass(respond[i].defaultResult.tagId,respond[i].defaultResult.mainClass);
+            zteam_deprotectClass(respond[i].detonationEffect.tagId,respond[i].detonationEffect.mainClass);
+            zteam_deprotectClass(respond[i].potentialResult.tagId,respond[i].potentialResult.mainClass);
         }
     }
 }
@@ -540,6 +540,7 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
         *(uint32_t *)&"lrtc",
         *(uint32_t *)&"ifil",
         *(uint32_t *)&"calp",
+        *(uint32_t *)&"ejbo",
         *(uint32_t *)&"ecss"
     };
     for(uint32_t i=0;i<sizeof(objectTagClasses)/4;i++) {
