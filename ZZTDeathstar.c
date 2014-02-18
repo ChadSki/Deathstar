@@ -124,6 +124,26 @@ static void *translatePointer(uint32_t pointer) { //translates a map pointer to 
     return mapdata + (pointer - magic);
 }
 
+static void zteam_deprotectColl(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, COLL);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    CollDependencies coll = *(CollDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_deprotectClass(coll.areaDamageEffect.tagId, coll.areaDamageEffect.mainClass);
+    zteam_deprotectClass(coll.bodyDamagedEffect.tagId, coll.bodyDamagedEffect.mainClass);
+    zteam_deprotectClass(coll.bodyDepletedEffect.tagId,coll.bodyDepletedEffect.mainClass);
+    zteam_deprotectClass(coll.bodyDestroyedEffect.tagId, coll.bodyDestroyedEffect.mainClass);
+    zteam_deprotectClass(coll.localizedDamageEffect.tagId, coll.localizedDamageEffect.mainClass);
+    zteam_deprotectClass(coll.shieldDamagedEffect.tagId, coll.shieldDamagedEffect.mainClass);
+    zteam_deprotectClass(coll.shieldDepletedEffect.tagId, coll.shieldDepletedEffect.mainClass);
+    zteam_deprotectClass(coll.shieldRechargingEffect.tagId, coll.shieldRechargingEffect.mainClass);
+    CollRegionsDependencies *regions = translatePointer(coll.regions.offset);
+    for(uint32_t i=0;i<coll.regions.count;i++) {
+        zteam_deprotectClass(regions[i].destroyedEffect.tagId, regions[i].destroyedEffect.mainClass);
+    }
+}
+
 static void zteam_deprotectShdr(TagID tagId) {
     if(isNulledOut(tagId)) return; //however, this also means the map is broken
     if(deprotectedTags[tagId.tagTableIndex]) return;
@@ -361,7 +381,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     
     zteam_deprotectMod2(object.model.tagId);
     zteam_changeTagClass(object.animation.tagId,ANTR);
-    zteam_changeTagClass(object.collision.tagId,COLL);
+    zteam_deprotectColl(object.collision.tagId);
     zteam_changeTagClass(object.physics.tagId,PHYS);
     zteam_deprotectShdr(object.shader.tagId);
     

@@ -668,4 +668,29 @@ typedef struct {
     TagReflexive auxHudMeters; //0x3CC
 } __attribute__((packed)) UnhiDependencies;
 
+typedef struct {
+    char padding[0x38]; //0x0
+    Dependency destroyedEffect; //0x38
+    char padding1[0xC];
+} __attribute__((packed)) CollRegionsDependencies;
+
+
+typedef struct {
+    char padding[0x70]; //0x0
+    Dependency localizedDamageEffect; //0x70
+    char padding1[0x4]; //0x80
+    Dependency areaDamageEffect; //0x84
+    char padding2[0x4]; //0x94
+    Dependency bodyDamagedEffect; //0x98
+    Dependency bodyDepletedEffect; //0xA8
+    char padding3[0x4]; //0xB8
+    Dependency bodyDestroyedEffect; //0xBC
+    char padding4[0xBC];
+    Dependency shieldDamagedEffect; //0x188
+    Dependency shieldDepletedEffect; //0x198
+    Dependency shieldRechargingEffect; //0x1A8
+    char padding5[0x88]; //0x1B8
+    TagReflexive regions; //0x240
+} __attribute__((packed)) CollDependencies;
+
 #endif
