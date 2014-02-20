@@ -59,6 +59,19 @@
 #define TRAK "kart"
 #define FOOT "toof"
 #define LSND "dnsl"
+#define BIPD "dpib"
+#define VEHI "ihev"
+#define WEAP "paew"
+#define EQIP "piqe"
+#define GARB "brag"
+#define PROJ "jorp"
+#define SCEN "necs"
+#define MACH "hcam"
+#define CTRL "lrtc"
+#define LIFI "ifil"
+#define PLAC "calp"
+#define OBJE "ejbo"
+#define SSCE "ecss"
 
 
 typedef struct {
