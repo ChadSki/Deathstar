@@ -24,10 +24,16 @@
 
 #define META_MEMORY_OFFSET 0x40440000 //Halo CE and Halo PC ONLY
 
-static void zteam_deprotectObjectTag(TagID tagId);
+static void zteam_deprotectClass(TagID tagId, char class[4]);
+static void zteam_deprotectObjectTag(TagID tagId); //bipd, vehi, weap, eqip, garb, proj, scen, mach, ctrl, lifi, plac, obje, ssce
+static void zteam_deprotectColl(TagID tagId);
 static void zteam_deprotectEffe(TagID tagId);
 static void zteam_deprotectFoot(TagID tagId);
-static void zteam_deprotectClass(TagID tagId,char class[4]);
+static void zteam_deprotectItmc(TagID tagId);
+static void zteam_deprotectMod2(TagID tagId);
+static void zteam_deprotectPart(TagID tagId);
+static void zteam_deprotectShdr(TagID tagId);
+static void zteam_deprotectUnhi(TagID tagId);
 
 typedef enum {
     false = 0,
