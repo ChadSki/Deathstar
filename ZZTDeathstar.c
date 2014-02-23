@@ -22,6 +22,42 @@
 #include "ZZTDeathstar.h"
 #include "ZZTTagData.h"
 
+MapData openMapFromBuffer(void *buffer,uint32_t length) {
+    MapData mapData;
+    HaloMapHeader *mapHeader = ( HaloMapHeader *)(buffer);
+    if(mapHeader->integrityHead == *(uint32_t *)&"deah" || mapHeader->integrityFoot == *(uint32_t *)&"toof") {
+        mapData.error = MAP_INVALID_HEADER;
+    }
+    else if(mapHeader->indexOffset > length) {
+        mapData.error = MAP_INVALID_INDEX_POINTER;
+    }
+    else {
+        mapData.error = MAP_OK;
+    }
+    mapData.buffer = buffer;
+    mapData.length = length;
+    return mapData;
+}
+
+MapData openMapAtPath(const char *path) {
+    FILE *map = fopen(path,"r");
+    if(map)
+    {
+        fseek(map,0x0,SEEK_END);
+        uint32_t length = (uint32_t)ftell(map);
+        fseek(map,0x0,SEEK_SET);
+        void *buffer = malloc(length);
+        fread(buffer,length,0x1,map);
+        fclose(map);
+        return openMapFromBuffer(buffer, length);
+    }
+    else {
+        MapData invalidMap;
+        invalidMap.error = MAP_INVALID_PATH;
+        return invalidMap;
+    }
+}
+
 #define META_MEMORY_OFFSET 0x40440000 //Halo CE and Halo PC ONLY
 
 static void zteam_deprotectClass(TagID tagId, char class[4]);
@@ -80,31 +116,6 @@ uint32_t magic;
 char *mapdata;
 uint32_t mapdataSize;
 uint32_t tagdataSize;
-
-MapData openMapAtPath(const char *path) {
-    MapData mapData;
-    FILE *map = fopen(path,"r");
-    if(map)
-    {
-        fseek(map,0x0,SEEK_END);
-        mapData.length = (uint32_t)ftell(map);
-        fseek(map,0x0,SEEK_SET);
-        mapData.buffer = malloc(mapData.length);
-        fread(mapData.buffer,mapData.length,0x1,map);
-        fclose(map);
-        HaloMapHeader *mapHeader = ( HaloMapHeader *)(mapData.buffer);
-        if(mapHeader->indexOffset > mapData.length) {
-            mapData.error = MAP_INVALID_INDEX_POINTER;
-        }
-        else {
-            mapData.error = MAP_OK;
-        }
-    }
-    else {
-        mapData.error = MAP_INVALID_PATH;
-    }
-    return mapData;
-}
 
 int saveMap(const char *path, MapData map) {
     FILE *mapFile = fopen(path,"wb");
@@ -585,7 +596,7 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
 
 static bool classCanBeDeprotected(uint32_t class) {
     
-    uint32_t tagClasses[] = {
+    uint32_t tagClasses[] = { //these tags should never ever be touched.
         *(uint32_t *)&DEVC,
         *(uint32_t *)&HUDG,
         *(uint32_t *)&MATG,
@@ -601,7 +612,7 @@ static bool classCanBeDeprotected(uint32_t class) {
 }
 
 static bool classAutogeneric(uint32_t class) {
-    uint32_t tagClasses[] = {
+    uint32_t tagClasses[] = { //do not bother to deprotect these tags
         *(uint32_t *)&BITM,
         *(uint32_t *)&SND,
         *(uint32_t *)&SBSP,
@@ -651,23 +662,21 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
         if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
             continue;
         
-        bool automaticallyGeneric = classAutogeneric(tagArray[i].classA);
+        char *bestTag = "deathstar\\tag";
         
-        bool deprotected = false;
-        
-        if(!automaticallyGeneric) {
-            float best_match = 0.0;
+        if(!classAutogeneric(tagArray[i].classA)) {
+            float bestMatch = MATCHING_THRESHOLD;
             for(int map=0;map<map_count;map++) {
-                if(maps[map].error != MAP_OK) continue;
+                if(maps[map].error != MAP_OK) continue; //map is not a Halo cache map.
+                float currentMatch = 0.0;
                 //TODO: add fuzzy tag comparison
-            }
-            if(best_match != 0.0) {
-                deprotected = false;
+                if(currentMatch > bestMatch) {
+                    //bestTag = currentTagName;
+                }
             }
         }
         
-        if(!deprotected)
-            sprintf(names + namesLength, "deathstar\\tag_%u", i);
+        sprintf(names + namesLength, "%s_%u", bestTag, i); //all tags get a _# prefix
         
         int newname_length = (int)strlen(names + namesLength);
         

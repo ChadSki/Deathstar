@@ -28,6 +28,7 @@
 typedef enum {
     MAP_OK,
     MAP_INVALID_PATH,
+    MAP_INVALID_HEADER,
     MAP_INVALID_INDEX_POINTER
 } MapError;
 
@@ -35,10 +36,11 @@ typedef struct {
     char *buffer;
     uint32_t length;
     MapError error;
-} __attribute__((packed)) MapData;
+} MapData;
 
 
 MapData openMapAtPath(const char *path);
+MapData openMapFromBuffer(void *buffer,uint32_t length);
 int saveMap(const char *path, MapData map);
 MapData zteam_deprotect(MapData map);
 MapData name_deprotect(MapData map, MapData *maps, int map_count);
