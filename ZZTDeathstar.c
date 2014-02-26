@@ -371,18 +371,18 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     if(deprotectedTags[tagId.tagTableIndex]) return;
     
     uint32_t tagClasses[] = {
-        *(uint32_t *)&"dpib",
-        *(uint32_t *)&"ihev",
-        *(uint32_t *)&"paew",
-        *(uint32_t *)&"piqe",
-        *(uint32_t *)&"brag",
-        *(uint32_t *)&"jorp",
-        *(uint32_t *)&"necs",
-        *(uint32_t *)&"hcam",
-        *(uint32_t *)&"lrtc",
-        *(uint32_t *)&"ifil",
-        *(uint32_t *)&"calp",
-        *(uint32_t *)&"ecss"
+        *(uint32_t *)&BIPD,
+        *(uint32_t *)&VEHI,
+        *(uint32_t *)&WEAP,
+        *(uint32_t *)&EQIP,
+        *(uint32_t *)&GARB,
+        *(uint32_t *)&PROJ,
+        *(uint32_t *)&SCEN,
+        *(uint32_t *)&MACH,
+        *(uint32_t *)&CTRL,
+        *(uint32_t *)&LIFI,
+        *(uint32_t *)&PLAC,
+        *(uint32_t *)&SSCE
     };
     
     ObjeDependencies object = *( ObjeDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
