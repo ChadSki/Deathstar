@@ -657,10 +657,13 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
             continue;
         }
         
+        if(tagArray[i].notInsideMap)
+            continue;
         if(strncmp(translatePointer(tagArray[i].nameOffset),"ui\\",3) == 0)
             continue;
         if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
             continue;
+        
         const char *genericName = "deathstar\\%s\\tag";
         const char *tagClassName = translateHaloClassToName(tagArray[i].classA);
         char *bestTagTemp = malloc(strlen(tagClassName) + strlen(genericName) - 2);
