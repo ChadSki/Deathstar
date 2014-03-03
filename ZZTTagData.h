@@ -17,49 +17,10 @@
  
  */
 
+#include "ZZTTagClasses.h"
+
 #ifndef deathstar_ZZTTagData_h
 #define deathstar_ZZTTagData_h
-
-#define BITM "mtib"
-#define ANTR "rtna"
-#define COLL "lloc"
-#define MOD2 "2dom"
-#define PHYS "syhp"
-#define ITMC "cmti"
-#define SCNR "rncs"
-#define SKY  " yks"
-#define MATG "gtam"
-#define SBSP "psbs"
-#define FONT "tnof"
-#define USTR "rtsu"
-#define TAGC "cgat"
-#define SOUL "luoS"
-#define SND  "!dns"
-#define DELA "aLeD"
-#define DEVC "cved"
-#define HUDG "gduh"
-#define SHDR "rdhs"
-#define SOSO "osos"
-#define SCEX "xecs"
-#define SMET "tems"
-#define SCHI "ihcs"
-#define SPLA "alps"
-#define SOTR "rtos"
-#define SWAT "taws"
-#define SGLA "algs"
-#define SENV "vnes"
-#define LENS "snel"
-#define JPT  "!tpj"
-#define EFFE "effe"
-#define ACTV "vtca"
-#define LIGH "hgil"
-#define UNHI "ihnu"
-#define PART "trap"
-#define PPHY "yhpp"
-#define TRAK "kart"
-#define FOOT "toof"
-#define LSND "dnsl"
-
 
 typedef struct {
     uint16_t tagTableIndex;
@@ -667,5 +628,30 @@ typedef struct {
     TagReflexive hudWarningSounds; //0x3C0
     TagReflexive auxHudMeters; //0x3CC
 } __attribute__((packed)) UnhiDependencies;
+
+typedef struct {
+    char padding[0x38]; //0x0
+    Dependency destroyedEffect; //0x38
+    char padding1[0xC];
+} __attribute__((packed)) CollRegionsDependencies;
+
+
+typedef struct {
+    char padding[0x70]; //0x0
+    Dependency localizedDamageEffect; //0x70
+    char padding1[0x4]; //0x80
+    Dependency areaDamageEffect; //0x84
+    char padding2[0x4]; //0x94
+    Dependency bodyDamagedEffect; //0x98
+    Dependency bodyDepletedEffect; //0xA8
+    char padding3[0x4]; //0xB8
+    Dependency bodyDestroyedEffect; //0xBC
+    char padding4[0xBC];
+    Dependency shieldDamagedEffect; //0x188
+    Dependency shieldDepletedEffect; //0x198
+    Dependency shieldRechargingEffect; //0x1A8
+    char padding5[0x88]; //0x1B8
+    TagReflexive regions; //0x240
+} __attribute__((packed)) CollDependencies;
 
 #endif

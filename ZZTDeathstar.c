@@ -22,12 +22,54 @@
 #include "ZZTDeathstar.h"
 #include "ZZTTagData.h"
 
+MapData openMapFromBuffer(void *buffer,uint32_t length) {
+    MapData mapData;
+    HaloMapHeader *mapHeader = ( HaloMapHeader *)(buffer);
+    if(mapHeader->integrityHead == *(uint32_t *)&"deah" || mapHeader->integrityFoot == *(uint32_t *)&"toof") {
+        mapData.error = MAP_INVALID_HEADER;
+    }
+    else if(mapHeader->indexOffset > length) {
+        mapData.error = MAP_INVALID_INDEX_POINTER;
+    }
+    else {
+        mapData.error = MAP_OK;
+    }
+    mapData.buffer = buffer;
+    mapData.length = length;
+    return mapData;
+}
+
+MapData openMapAtPath(const char *path) {
+    FILE *map = fopen(path,"r");
+    if(map)
+    {
+        fseek(map,0x0,SEEK_END);
+        uint32_t length = (uint32_t)ftell(map);
+        fseek(map,0x0,SEEK_SET);
+        void *buffer = malloc(length);
+        fread(buffer,length,0x1,map);
+        fclose(map);
+        return openMapFromBuffer(buffer, length);
+    }
+    else {
+        MapData invalidMap;
+        invalidMap.error = MAP_INVALID_PATH;
+        return invalidMap;
+    }
+}
+
 #define META_MEMORY_OFFSET 0x40440000 //Halo CE and Halo PC ONLY
 
-static void zteam_deprotectObjectTag(TagID tagId);
+static void zteam_deprotectClass(TagID tagId, char class[4]);
+static void zteam_deprotectObjectTag(TagID tagId); //bipd, vehi, weap, eqip, garb, proj, scen, mach, ctrl, lifi, plac, obje, ssce
+static void zteam_deprotectColl(TagID tagId);
 static void zteam_deprotectEffe(TagID tagId);
 static void zteam_deprotectFoot(TagID tagId);
-static void zteam_deprotectClass(TagID tagId,char class[4]);
+static void zteam_deprotectItmc(TagID tagId);
+static void zteam_deprotectMod2(TagID tagId);
+static void zteam_deprotectPart(TagID tagId);
+static void zteam_deprotectShdr(TagID tagId);
+static void zteam_deprotectUnhi(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -75,31 +117,6 @@ char *mapdata;
 uint32_t mapdataSize;
 uint32_t tagdataSize;
 
-MapData openMapAtPath(const char *path) {
-    MapData mapData;
-    FILE *map = fopen(path,"r");
-    if(map)
-    {
-        fseek(map,0x0,SEEK_END);
-        mapData.length = (uint32_t)ftell(map);
-        fseek(map,0x0,SEEK_SET);
-        mapData.buffer = malloc(mapData.length);
-        fread(mapData.buffer,mapData.length,0x1,map);
-        fclose(map);
-        HaloMapHeader *mapHeader = ( HaloMapHeader *)(mapData.buffer);
-        if(mapHeader->indexOffset > mapData.length) {
-            mapData.error = MAP_INVALID_INDEX_POINTER;
-        }
-        else {
-            mapData.error = MAP_OK;
-        }
-    }
-    else {
-        mapData.error = MAP_INVALID_PATH;
-    }
-    return mapData;
-}
-
 int saveMap(const char *path, MapData map) {
     FILE *mapFile = fopen(path,"wb");
     if(mapFile) {
@@ -122,6 +139,26 @@ static void zteam_changeTagClass(TagID tagId,const char *class) {
 
 static void *translatePointer(uint32_t pointer) { //translates a map pointer to where it points to in Deathstar
     return mapdata + (pointer - magic);
+}
+
+static void zteam_deprotectColl(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, COLL);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    CollDependencies coll = *(CollDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_deprotectClass(coll.areaDamageEffect.tagId, coll.areaDamageEffect.mainClass);
+    zteam_deprotectClass(coll.bodyDamagedEffect.tagId, coll.bodyDamagedEffect.mainClass);
+    zteam_deprotectClass(coll.bodyDepletedEffect.tagId,coll.bodyDepletedEffect.mainClass);
+    zteam_deprotectClass(coll.bodyDestroyedEffect.tagId, coll.bodyDestroyedEffect.mainClass);
+    zteam_deprotectClass(coll.localizedDamageEffect.tagId, coll.localizedDamageEffect.mainClass);
+    zteam_deprotectClass(coll.shieldDamagedEffect.tagId, coll.shieldDamagedEffect.mainClass);
+    zteam_deprotectClass(coll.shieldDepletedEffect.tagId, coll.shieldDepletedEffect.mainClass);
+    zteam_deprotectClass(coll.shieldRechargingEffect.tagId, coll.shieldRechargingEffect.mainClass);
+    CollRegionsDependencies *regions = translatePointer(coll.regions.offset);
+    for(uint32_t i=0;i<coll.regions.count;i++) {
+        zteam_deprotectClass(regions[i].destroyedEffect.tagId, regions[i].destroyedEffect.mainClass);
+    }
 }
 
 static void zteam_deprotectShdr(TagID tagId) {
@@ -334,18 +371,18 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     if(deprotectedTags[tagId.tagTableIndex]) return;
     
     uint32_t tagClasses[] = {
-        *(uint32_t *)&"dpib",
-        *(uint32_t *)&"ihev",
-        *(uint32_t *)&"paew",
-        *(uint32_t *)&"piqe",
-        *(uint32_t *)&"brag",
-        *(uint32_t *)&"jorp",
-        *(uint32_t *)&"necs",
-        *(uint32_t *)&"hcam",
-        *(uint32_t *)&"lrtc",
-        *(uint32_t *)&"ifil",
-        *(uint32_t *)&"calp",
-        *(uint32_t *)&"ecss"
+        *(uint32_t *)&BIPD,
+        *(uint32_t *)&VEHI,
+        *(uint32_t *)&WEAP,
+        *(uint32_t *)&EQIP,
+        *(uint32_t *)&GARB,
+        *(uint32_t *)&PROJ,
+        *(uint32_t *)&SCEN,
+        *(uint32_t *)&MACH,
+        *(uint32_t *)&CTRL,
+        *(uint32_t *)&LIFI,
+        *(uint32_t *)&PLAC,
+        *(uint32_t *)&SSCE
     };
     
     ObjeDependencies object = *( ObjeDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
@@ -361,7 +398,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     
     zteam_deprotectMod2(object.model.tagId);
     zteam_changeTagClass(object.animation.tagId,ANTR);
-    zteam_changeTagClass(object.collision.tagId,COLL);
+    zteam_deprotectColl(object.collision.tagId);
     zteam_changeTagClass(object.physics.tagId,PHYS);
     zteam_deprotectShdr(object.shader.tagId);
     
@@ -529,19 +566,19 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
         return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     uint32_t objectTagClasses[] = {
-        *(uint32_t *)&"dpib",
-        *(uint32_t *)&"ihev",
-        *(uint32_t *)&"paew",
-        *(uint32_t *)&"piqe",
-        *(uint32_t *)&"brag",
-        *(uint32_t *)&"jorp",
-        *(uint32_t *)&"necs",
-        *(uint32_t *)&"hcam",
-        *(uint32_t *)&"lrtc",
-        *(uint32_t *)&"ifil",
-        *(uint32_t *)&"calp",
-        *(uint32_t *)&"ejbo",
-        *(uint32_t *)&"ecss"
+        *(uint32_t *)&BIPD,
+        *(uint32_t *)&VEHI,
+        *(uint32_t *)&WEAP,
+        *(uint32_t *)&EQIP,
+        *(uint32_t *)&GARB,
+        *(uint32_t *)&PROJ,
+        *(uint32_t *)&SCEN,
+        *(uint32_t *)&MACH,
+        *(uint32_t *)&CTRL,
+        *(uint32_t *)&LIFI,
+        *(uint32_t *)&PLAC,
+        *(uint32_t *)&OBJE,
+        *(uint32_t *)&SSCE
     };
     for(uint32_t i=0;i<sizeof(objectTagClasses)/4;i++) {
         if(*(uint32_t *)class == objectTagClasses[i]) {
@@ -559,7 +596,7 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
 
 static bool classCanBeDeprotected(uint32_t class) {
     
-    uint32_t tagClasses[] = {
+    uint32_t tagClasses[] = { //these tags should never ever be touched.
         *(uint32_t *)&DEVC,
         *(uint32_t *)&HUDG,
         *(uint32_t *)&MATG,
@@ -575,7 +612,7 @@ static bool classCanBeDeprotected(uint32_t class) {
 }
 
 static bool classAutogeneric(uint32_t class) {
-    uint32_t tagClasses[] = {
+    uint32_t tagClasses[] = { //do not bother to deprotect these tags
         *(uint32_t *)&BITM,
         *(uint32_t *)&SND,
         *(uint32_t *)&SBSP,
@@ -624,24 +661,26 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
             continue;
         if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
             continue;
+        const char *genericName = "deathstar\\%s\\tag";
+        const char *tagClassName = translateHaloClassToName(tagArray[i].classA);
+        char *bestTag = calloc(strlen(tagClassName) + strlen(genericName) - 2,0x1);
+        sprintf(bestTag,genericName,tagClassName);
         
-        bool automaticallyGeneric = classAutogeneric(tagArray[i].classA);
-        
-        bool deprotected = false;
-        
-        if(!automaticallyGeneric) {
-            float best_match = 0.0;
+        if(!classAutogeneric(tagArray[i].classA)) {
+            float bestMatch = MATCHING_THRESHOLD;
             for(int map=0;map<map_count;map++) {
-                if(maps[map].error != MAP_OK) continue;
+                if(maps[map].error != MAP_OK) continue; //map is not a Halo cache map.
+                float currentMatch = 0.0;
                 //TODO: add fuzzy tag comparison
-            }
-            if(best_match != 0.0) {
-                deprotected = false;
+                if(currentMatch > bestMatch) {
+                    //bestTag = currentTagName;
+                }
             }
         }
         
-        if(!deprotected)
-            sprintf(names + namesLength, "deathstar\\tag_%u", i);
+        sprintf(names + namesLength, "%s_%u", bestTag, i); //all tags get a _# prefix
+        
+        free(bestTag);
         
         int newname_length = (int)strlen(names + namesLength);
         
