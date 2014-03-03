@@ -76,6 +76,8 @@ typedef enum {
     true = 1
 } bool;
 
+bool haloCEmap = false;
+
 typedef enum {
     OBJECT_BIPD = 0x0,
     OBJECT_VEHI = 0x1,
@@ -657,7 +659,7 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
             continue;
         }
         
-        if(tagArray[i].notInsideMap)
+        if(haloCEmap && tagArray[i].notInsideMap)
             continue;
         if(strncmp(translatePointer(tagArray[i].nameOffset),"ui\\",3) == 0)
             continue;
@@ -729,8 +731,10 @@ MapData zteam_deprotect(MapData map)
     
     deprotectedTags = calloc(sizeof(bool) * tagCount,0x1);
     
+    haloCEmap = header->version != 609;
+    
     for(uint32_t i=0;i<tagCount;i++) {
-        deprotectedTags[i] = tagArray[i].notInsideMap;
+        deprotectedTags[i] = haloCEmap && tagArray[i].notInsideMap;
     }
     
     mapdataSize = length;
