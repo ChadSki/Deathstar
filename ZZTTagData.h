@@ -74,7 +74,8 @@ typedef struct {
 	TagID identity;
 	uint32_t nameOffset;
 	uint32_t dataOffset;
-	char padding[0x8];
+    uint32_t notInsideMap;
+	char padding[0x4];
 } __attribute__((packed)) MapTag;
 
 typedef struct {

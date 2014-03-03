@@ -657,13 +657,17 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
             continue;
         }
         
+        if(tagArray[i].notInsideMap)
+            continue;
         if(strncmp(translatePointer(tagArray[i].nameOffset),"ui\\",3) == 0)
             continue;
         if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
             continue;
+        
         const char *genericName = "deathstar\\%s\\tag";
         const char *tagClassName = translateHaloClassToName(tagArray[i].classA);
-        char *bestTag = calloc(strlen(tagClassName) + strlen(genericName) - 2,0x1);
+        char *bestTagTemp = malloc(strlen(tagClassName) + strlen(genericName) - 2);
+        char *bestTag = bestTagTemp;
         sprintf(bestTag,genericName,tagClassName);
         
         if(!classAutogeneric(tagArray[i].classA)) {
@@ -680,7 +684,7 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
         
         sprintf(names + namesLength, "%s_%u", bestTag, i); //all tags get a _# prefix
         
-        free(bestTag);
+        free(bestTagTemp);
         
         int newname_length = (int)strlen(names + namesLength);
         
@@ -724,6 +728,10 @@ MapData zteam_deprotect(MapData map)
     tagCount = index->tagCount;
     
     deprotectedTags = calloc(sizeof(bool) * tagCount,0x1);
+    
+    for(uint32_t i=0;i<tagCount;i++) {
+        deprotectedTags[i] = tagArray[i].notInsideMap;
+    }
     
     mapdataSize = length;
     tagdataSize = length - header->indexOffset;
