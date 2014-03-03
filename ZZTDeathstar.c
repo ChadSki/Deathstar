@@ -661,8 +661,10 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
             continue;
         if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
             continue;
-        
-        char *bestTag = "deathstar\\tag";
+        const char *genericName = "deathstar\\%s\\tag";
+        const char *tagClassName = translateHaloClassToName(tagArray[i].classA);
+        char *bestTag = calloc(strlen(tagClassName) + strlen(genericName) - 2,0x1);
+        sprintf(bestTag,genericName,tagClassName);
         
         if(!classAutogeneric(tagArray[i].classA)) {
             float bestMatch = MATCHING_THRESHOLD;
@@ -677,6 +679,8 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
         }
         
         sprintf(names + namesLength, "%s_%u", bestTag, i); //all tags get a _# prefix
+        
+        free(bestTag);
         
         int newname_length = (int)strlen(names + namesLength);
         
