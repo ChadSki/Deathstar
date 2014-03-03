@@ -645,7 +645,7 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     HaloMapHeader *header = ( HaloMapHeader *)(modded_buffer);
     HaloMapIndex *index = ( HaloMapIndex *)(modded_buffer + header->indexOffset);
     
-    haloCEmap = header->version != 609;
+    haloCEmap = header->version == 609;
     
     mapdata = modded_buffer;
     magic = META_MEMORY_OFFSET - header->indexOffset;
@@ -733,7 +733,7 @@ MapData zteam_deprotect(MapData map)
     
     deprotectedTags = calloc(sizeof(bool) * tagCount,0x1);
     
-    haloCEmap = header->version != 609;
+    haloCEmap = header->version == 609;
     
     for(uint32_t i=0;i<tagCount;i++) {
         deprotectedTags[i] = haloCEmap && tagArray[i].notInsideMap;
