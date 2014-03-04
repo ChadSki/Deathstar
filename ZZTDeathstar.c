@@ -77,6 +77,7 @@ static void zteam_deprotectHudg(TagID tagId);
 static void zteam_deprotectSky(TagID tagId);
 static void zteam_deprotectDeca(TagID tagId);
 static void zteam_deprotectWphi(TagID tagId);
+static void zteam_deprotectAntr(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -368,6 +369,18 @@ static void zteam_deprotectDeca(TagID tagId) {
     zteam_changeTagClass(deca.shaderMap.tagId, BITM);
 }
 
+static void zteam_deprotectAntr(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, ANTR);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    AntrDependencies antr = *(AntrDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    AntrSoundsDependencies *antrSounds = translatePointer(antr.sounds.offset);
+    for(uint32_t i=0;i<antr.sounds.count;i++) {
+        zteam_changeTagClass(antrSounds[i].sound.tagId, SND);
+    }
+}
+
 static inline void zteam_deprotectWphiOverlay(TagReflexive overlay) {
     WphiOverlayElements *wphiOverlay = translatePointer(overlay.offset);
     for(uint32_t i=0;i<overlay.count;i++) {
@@ -464,7 +477,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     deprotectedTags[tagId.tagTableIndex] = true;
     
     zteam_deprotectMod2(object.model.tagId);
-    zteam_changeTagClass(object.animation.tagId,ANTR);
+    zteam_deprotectAntr(object.animation.tagId);
     zteam_deprotectColl(object.collision.tagId);
     zteam_changeTagClass(object.physics.tagId,PHYS);
     zteam_deprotectShdr(object.shader.tagId);
@@ -500,7 +513,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     if(object.tagObjectType == OBJECT_WEAP) {
         WeapDependencies weap = *( WeapDependencies *)objectTag;
         zteam_deprotectMod2(weap.fpModel.tagId);
-        zteam_changeTagClass(weap.fpAnimation.tagId, ANTR);
+        zteam_deprotectAntr(weap.fpAnimation.tagId);
         WeapTriggerDependencies *triggers = translatePointer(weap.triggers.offset);
         for(uint32_t i=0;i<weap.triggers.count;i++) {
             zteam_deprotectObjectTag(triggers[i].projectile.tagId);
@@ -513,6 +526,15 @@ static void zteam_deprotectObjectTag(TagID tagId) {
                 zteam_changeTagClass(firingEffects[fire].misfireDamage.tagId, JPT);
                 zteam_changeTagClass(firingEffects[fire].emptyDamage.tagId, JPT);
                 zteam_changeTagClass(firingEffects[fire].firingDamage.tagId, JPT);
+            }
+        }
+        WeapMagazineDependencies *magazines = translatePointer(weap.magazines.offset);
+        for(uint32_t i=0;i<weap.magazines.count;i++) {
+            zteam_deprotectClass(magazines[i].chamberingEffect.tagId, magazines[i].chamberingEffect.mainClass);
+            zteam_deprotectClass(magazines[i].reloadingEffect.tagId, magazines[i].reloadingEffect.mainClass);
+            WeapMagazineMagazineDependencies *magequipment = translatePointer(magazines[i].weapMagazineEquipment.offset);
+            for(uint32_t q=0;q<magazines[i].weapMagazineEquipment.count;q++) {
+                zteam_deprotectObjectTag(magequipment[q].equipment.tagId);
             }
         }
         zteam_deprotectWphi(weap.hud.tagId);
@@ -756,7 +778,7 @@ static void zteam_deprotectSky(TagID tagId) {
     zteam_changeTagClass(tagId, SKY);
     SkyDependencies sky = *(SkyDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     zteam_deprotectMod2(sky.model.tagId);
-    zteam_changeTagClass(sky.animation.tagId, ANTR);
+    zteam_deprotectAntr(sky.animation.tagId);
     zteam_changeTagClass(sky.fog.tagId, FOG);
     SkyLensFlares *lensFlares = (SkyLensFlares *)translatePointer(sky.lensFlares.offset);
     for(uint32_t i=0;i<sky.lensFlares.count;i++) {

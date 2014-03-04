@@ -105,9 +105,7 @@ typedef struct {
     Dependency reloadingEffect;  //0x38 effe
     Dependency chamberingEffect; //0x48 effe
     char padding1[0xC];          //0x58
-    uint32_t magazinesCount;     //0x64
-    uint32_t magazinesOffset;    //0x68
-    char padding2[0x4];          //0x6C
+    TagReflexive weapMagazineEquipment; //0x64
 } __attribute__((packed)) WeapMagazineDependencies; //0x70
 
 typedef struct {
@@ -782,5 +780,15 @@ typedef struct {
     char padding2[0x10]; //0x9C
     TagReflexive screenEffect; //0xAC
 } __attribute__((packed)) WphiDependencies;
+
+typedef struct {
+    Dependency sound;
+    uint32_t padding;
+} __attribute__((packed)) AntrSoundsDependencies;
+
+typedef struct {
+    char padding[0x54];
+    TagReflexive sounds;
+} __attribute__((packed)) AntrDependencies;
 
 #endif
