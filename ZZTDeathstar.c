@@ -75,6 +75,7 @@ static void zteam_deprotectFont(TagID tagId);
 static void zteam_deprotectHudDigits(TagID tagId);
 static void zteam_deprotectHudg(TagID tagId);
 static void zteam_deprotectSky(TagID tagId);
+static void zteam_deprotectDeca(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -345,6 +346,16 @@ static void zteam_deprotectFont(TagID tagId) {
     zteam_deprotectFont(font.italicFont.tagId);
     zteam_deprotectFont(font.condenseFont.tagId);
     zteam_deprotectFont(font.underlineFont.tagId);
+}
+
+static void zteam_deprotectDeca(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, DECA);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    DecaDependencies deca = *(DecaDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_deprotectDeca(deca.nextDecal.tagId);
+    zteam_changeTagClass(deca.shaderMap.tagId, BITM);
 }
 
 static inline void zteam_deprotectUnhiMultitextureOverlay(TagReflexive reflexive) {
@@ -856,6 +867,11 @@ MapData zteam_deprotect(MapData map)
     ScnrBSPs *bsps = ( ScnrBSPs *)translatePointer(scnrData.BSPs.offset);
     for(uint32_t i=0;i<scnrData.BSPs.count;i++) {
         zteam_deprotectSBSP(bsps[i].bsp.tagId, bsps[i].fileOffset, bsps[i].bspMagic);
+    }
+    
+    Dependency *decas = (Dependency *)translatePointer(scnrData.decalPalette.offset);
+    for(uint32_t i=0;i<scnrData.decalPalette.count;i++) {
+        zteam_deprotectDeca(decas[i].tagId);
     }
     
     ScnrNetgameItmcDependencies *itmcs = ( ScnrNetgameItmcDependencies *)translatePointer(scnrData.netgameItmcs.offset);

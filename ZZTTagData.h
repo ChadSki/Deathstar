@@ -337,6 +337,7 @@ typedef struct {
     Dependency equipment[0x6];   //0x3C
     char padding1[0x30];         //0x9C
 } __attribute__((packed)) ScnrStartingEquipment;
+
 typedef struct {
     Dependency unknown[0x3];     //0x0   sbsp
     TagReflexive skies;          //0x30
@@ -736,5 +737,12 @@ typedef struct {
     char padding1[0x1C]; //0xA8
     TagReflexive lensFlares; //0xC4
 } __attribute__((packed)) SkyDependencies;
+
+typedef struct {
+    char padding[0x8]; //0x0
+    Dependency nextDecal; //0x8
+    char padding1[0xC0]; //0x18
+    Dependency shaderMap; //0xD8
+} __attribute__((packed)) DecaDependencies;
 
 #endif
