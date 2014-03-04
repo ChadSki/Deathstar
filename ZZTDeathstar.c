@@ -79,6 +79,8 @@ static void zteam_deprotectDeca(TagID tagId);
 static void zteam_deprotectWphi(TagID tagId);
 static void zteam_deprotectAntr(TagID tagId);
 static void zteam_deprotectDeLa(TagID tagId);
+static void zteam_deprotectCont(TagID tagId);
+static void zteam_deprotectMetr(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -649,6 +651,17 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     }
 }
 
+static void zteam_deprotectFlag(TagID tagId) {
+    if(isNulledOut(tagId))
+        return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId,FLAG);
+    FlagDependencies flag = *(FlagDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_deprotectClass(flag.blueShader.tagId, flag.blueShader.mainClass);
+    zteam_deprotectClass(flag.redShader.tagId, flag.redShader.mainClass);
+    zteam_deprotectClass(flag.physics.tagId, flag.physics.mainClass);
+}
+
 static void zteam_deprotectCont(TagID tagId) {
     if(isNulledOut(tagId))
         return;
@@ -664,14 +677,14 @@ static void zteam_deprotectCont(TagID tagId) {
     }
 }
 
-static void zteam_deprotectObjectPalette(TagReflexive reflexive) {
+static inline void zteam_deprotectObjectPalette(TagReflexive reflexive) {
     ScnrPaletteDependency *palette = (ScnrPaletteDependency *)translatePointer(reflexive.offset);
     for(int i=0;i<reflexive.count;i++) {
         zteam_deprotectObjectTag(palette[i].object.tagId);
     }
 }
 
-static void zteam_deprotectMatgObjectTagCollection(TagReflexive reflexive) {
+static inline void zteam_deprotectMatgObjectTagCollection(TagReflexive reflexive) {
     MatgTagCollectionDependencies *collection = ( MatgTagCollectionDependencies *)translatePointer(reflexive.offset);
     for(int i=0;i<reflexive.count;i++) {
         zteam_deprotectObjectTag(collection[i].tag.tagId);
@@ -772,6 +785,9 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
     else if(strncmp(class,DECA,4) == 0) {
         zteam_deprotectDeca(tagId);
     }
+    else if(strncmp(class,FLAG,4) == 0) {
+        zteam_deprotectFlag(tagId);
+    }
     else {
         zteam_changeTagClass(tagId, class);
     }
@@ -827,6 +843,16 @@ static void zteam_deprotectHudDigits(TagID tagId) {
     zteam_changeTagClass(tagId, HUD);
     HudDependencies hud = *(HudDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     zteam_changeTagClass(hud.digitsBitmap.tagId,BITM);
+}
+
+static void zteam_deprotectMetr(TagID tagId) {
+    if(isNulledOut(tagId))
+        return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, METR);
+    MetrDependencies metr = *(MetrDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_changeTagClass(metr.sourceBitmaps.tagId, BITM);
+    zteam_changeTagClass(metr.stencilBitmaps.tagId, BITM);
 }
 
 static bool classCanBeDeprotected(uint32_t class) {
@@ -1081,8 +1107,9 @@ MapData zteam_deprotect(MapData map)
             zteam_changeTagClass(interfaceBitm[i].screenColorTable.tagId, COLO);
         }
         
-        Dependency *cameraTracks = translatePointer(matg.camera.offset);
-        zteam_deprotectDependencyArray(cameraTracks, matg.camera.count, TRAK);
+        zteam_deprotectDependencyArray(translatePointer(matg.camera.offset), matg.camera.count, TRAK);
+        zteam_deprotectDependencyArray(translatePointer(matg.sounds.offset), matg.sounds.count, SND);
+        
         MatgPlayerInformationDependencies *playerInfo = translatePointer(matg.playerInfo.offset);
         for(uint32_t i=0;i<matg.playerInfo.count;i++) {
             zteam_deprotectObjectTag(playerInfo[i].unit.tagId);
@@ -1094,7 +1121,20 @@ MapData zteam_deprotect(MapData map)
             zteam_deprotectObjectTag(multiplayerInfo[i].flag.tagId);
             zteam_deprotectObjectTag(multiplayerInfo[i].ball.tagId);
             zteam_deprotectMatgObjectTagCollection(multiplayerInfo[i].vehicles);
+            zteam_deprotectClass(multiplayerInfo[i].flagShader.tagId, multiplayerInfo[i].flagShader.mainClass);
+            zteam_deprotectClass(multiplayerInfo[i].hillShader.tagId, multiplayerInfo[i].hillShader.mainClass);
         }
+        
+        MatgFPInterface *fpInterface = translatePointer(matg.fpInterface.offset);
+        for(uint32_t i=0;i<matg.fpInterface.count;i++) {
+            zteam_deprotectMod2(fpInterface[i].fpHands.tagId);
+            zteam_changeTagClass(fpInterface[i].baseBitmap.tagId, BITM);
+            zteam_deprotectMetr(fpInterface[i].bodyMeter.tagId);
+            zteam_deprotectMetr(fpInterface[i].shieldMeter.tagId);
+            zteam_deprotectClass(fpInterface[i].nightVisionOffEffect.tagId, fpInterface[i].nightVisionOffEffect.mainClass);
+            zteam_deprotectClass(fpInterface[i].nightVisionOnEffect.tagId, fpInterface[i].nightVisionOnEffect.mainClass);
+        }
+        
     }
     
     for(uint32_t i=0;i<tagCount;i++) {

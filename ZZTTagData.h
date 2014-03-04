@@ -423,16 +423,28 @@ typedef struct {
 } __attribute__((packed)) MatgInterfaceBitmapsDependencies;
 
 typedef struct {
+    Dependency fpHands; //0x0
+    Dependency baseBitmap; //0x10
+    Dependency shieldMeter; //0x20
+    char padding[0x4]; //0x30
+    Dependency bodyMeter; //0x34
+    char padding1[0x4]; //0x44
+    Dependency nightVisionOnEffect; //0x48
+    Dependency nightVisionOffEffect; //0x58
+    char padding2[0x58]; //0x68
+} __attribute__((packed)) MatgFPInterface;
+
+typedef struct {
     char padding[0xF8];          //0x0
     TagReflexive sounds;         //0xF8  --TagCollection
     TagReflexive camera;         //0x104 --TagCollection
     char padding1[0x18];         //0x110
     TagReflexive grenades;       //0x128
     TagReflexive rasterizerData; //0x134 --incomplete
-    TagReflexive interfaceBitm;  //0x140 --incomplete
+    TagReflexive interfaceBitm;  //0x140
     TagReflexive weapons;        //0x14C --TagCollection
     TagReflexive powerups;       //0x158 --TagCollection
-    TagReflexive multiplayerInfo;//0x164 --incomplete
+    TagReflexive multiplayerInfo;//0x164
     TagReflexive playerInfo;     //0x170
     TagReflexive fpInterface;    //0x17C --incomplete
     TagReflexive fallingDamage;  //0x188 --incomplete
@@ -865,5 +877,19 @@ typedef struct {
     char padding2[0x58]; //0xE0
     TagReflexive pointStates; //0x138
 } __attribute__((packed)) ContDependencies;
+
+typedef struct {
+    char padding[0x4];
+    Dependency stencilBitmaps;
+    Dependency sourceBitmaps;
+} __attribute__((packed)) MetrDependencies;
+
+typedef struct{
+    char padding[0x18]; //0x0
+    Dependency redShader; //0x18
+    Dependency physics; //0x28
+    char padding1[0xC]; //0x38
+    Dependency blueShader; //0x44
+} __attribute__((packed)) FlagDependencies;
 
 #endif
