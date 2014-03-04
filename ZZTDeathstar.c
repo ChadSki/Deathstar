@@ -70,6 +70,10 @@ static void zteam_deprotectMod2(TagID tagId);
 static void zteam_deprotectPart(TagID tagId);
 static void zteam_deprotectShdr(TagID tagId);
 static void zteam_deprotectUnhi(TagID tagId);
+static void zteam_deprotectGrhi(TagID tagId);
+static void zteam_deprotectFont(TagID tagId);
+static void zteam_deprotectHudDigits(TagID tagId);
+static void zteam_deprotectHudg(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -133,14 +137,14 @@ static bool isNulledOut(TagID tag) {
     return (tag.tableIndex == 0 && tag.tagTableIndex == 0) || tag.tagTableIndex > tagCount;
 }
 
+static void *translatePointer(uint32_t pointer) { //translates a map pointer to where it points to in Deathstar
+    return mapdata + (pointer - magic);
+}
+
 static void zteam_changeTagClass(TagID tagId,const char *class) {
     if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     tagArray[tagId.tagTableIndex].classA = *(uint32_t *)(class);
-}
-
-static void *translatePointer(uint32_t pointer) { //translates a map pointer to where it points to in Deathstar
-    return mapdata + (pointer - magic);
 }
 
 static void zteam_deprotectColl(TagID tagId) {
@@ -328,6 +332,18 @@ static void zteam_deprotectFoot(TagID tagId) {
             zteam_changeTagClass(materials[material].sound.tagId, SND);
         }
     }
+}
+
+static void zteam_deprotectFont(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, FONT);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    FontDependencies font = *(FontDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_deprotectFont(font.boldFont.tagId);
+    zteam_deprotectFont(font.italicFont.tagId);
+    zteam_deprotectFont(font.condenseFont.tagId);
+    zteam_deprotectFont(font.underlineFont.tagId);
 }
 
 static inline void zteam_deprotectUnhiMultitextureOverlay(TagReflexive reflexive) {
@@ -562,6 +578,26 @@ static void zteam_deprotectSBSP(TagID tagId,uint32_t fileOffset, uint32_t bspMag
         }
     }
 }
+static void zteam_deprotectHudg(TagID tagId) {
+    if(isNulledOut(tagId))
+        return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, HUDG);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    
+    HudgDependencies hudg = *(HudgDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_changeTagClass(hudg.alternateIconText.tagId, USTR);
+    zteam_changeTagClass(hudg.carnageReport.tagId, BITM);
+    zteam_changeTagClass(hudg.checkpointSound.tagId,SND);
+    zteam_changeTagClass(hudg.damageIndicatorBitmap.tagId, BITM);
+    zteam_changeTagClass(hudg.defaultWeaponHud.tagId, WPHI);
+    zteam_changeTagClass(hudg.hudMessages.tagId, HMT);
+    zteam_changeTagClass(hudg.iconBitmap.tagId, BITM);
+    zteam_changeTagClass(hudg.iconMessageText.tagId, USTR);
+    zteam_deprotectFont(hudg.multiPlayerFont.tagId);
+    zteam_deprotectFont(hudg.singlePlayerFont.tagId);
+    zteam_changeTagClass(hudg.waypointArrowBitmap.tagId, BITM);
+}
 
 static void zteam_deprotectClass(TagID tagId, char class[4]) {
     if(isNulledOut(tagId))
@@ -596,11 +632,33 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
     zteam_changeTagClass(tagId, class);
 }
 
+static void zteam_deprotectGrhi(TagID tagId) {
+    if(isNulledOut(tagId))
+        return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, GRHI);
+    deprotectedTags[tagId.tagTableIndex] = false;
+    GrhiDependencies grhi = *(GrhiDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_changeTagClass(grhi.bgInterfaceBitmap.tagId, BITM);
+    zteam_changeTagClass(grhi.interfaceBitmap.tagId, BITM);
+    zteam_changeTagClass(grhi.overlayBitmap.tagId, BITM);
+    zteam_deprotectUnhiMultitextureOverlay(grhi.bgMutlitextureOverlay);
+    zteam_deprotectUnhiMultitextureOverlay(grhi.fgMultitextureOverlay);
+}
+
+static void zteam_deprotectHudDigits(TagID tagId) {
+    if(isNulledOut(tagId))
+        return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, HUD);
+    HudDependencies hud = *(HudDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_changeTagClass(hud.digitsBitmap.tagId,BITM);
+}
+
 static bool classCanBeDeprotected(uint32_t class) {
     
     uint32_t tagClasses[] = { //these tags should never ever be touched.
         *(uint32_t *)&DEVC,
-        *(uint32_t *)&HUDG,
         *(uint32_t *)&MATG,
         *(uint32_t *)&DELA,
         *(uint32_t *)&SOUL,
@@ -616,6 +674,7 @@ static bool classCanBeDeprotected(uint32_t class) {
 static bool classAutogeneric(uint32_t class) {
     uint32_t tagClasses[] = { //do not bother to deprotect these tags
         *(uint32_t *)&BITM,
+        *(uint32_t *)&HUDG,
         *(uint32_t *)&SND,
         *(uint32_t *)&SBSP,
         *(uint32_t *)&SCNR,
@@ -792,6 +851,39 @@ MapData zteam_deprotect(MapData map)
         MatgDependencies matg = *( MatgDependencies *)(translatePointer(tagArray[matgTag.tagTableIndex].dataOffset));
         zteam_deprotectMatgObjectTagCollection(matg.weapons);
         zteam_deprotectMatgObjectTagCollection(matg.powerups);
+        
+        MatgGrenadesDependencies *grenades = translatePointer(matg.grenades.offset);
+        for(uint32_t i=0;i<matg.grenades.count;i++) {
+            zteam_deprotectObjectTag(grenades[i].equipment.tagId);
+            zteam_deprotectObjectTag(grenades[i].projectile.tagId);
+            zteam_deprotectClass(grenades[i].throwingEffect.tagId, grenades[i].throwingEffect.mainClass);
+            zteam_deprotectGrhi(grenades[i].hudInterface.tagId);
+            
+        }
+        
+        MatgInterfaceBitmapsDependencies *interfaceBitm = translatePointer(matg.interfaceBitm.offset);
+        for(uint32_t i=0;i<matg.interfaceBitm.count;i++) {
+            zteam_changeTagClass(interfaceBitm[i].dialogColorTable.tagId, COLO);
+            zteam_changeTagClass(interfaceBitm[i].editorColorTable.tagId, COLO);
+            zteam_deprotectFont(interfaceBitm[i].fontSystem.tagId);
+            zteam_deprotectFont(interfaceBitm[i].fontTerminal.tagId);
+            zteam_changeTagClass(interfaceBitm[i].hudColorTable.tagId, COLO);
+            zteam_deprotectHudDigits(interfaceBitm[i].hudDigits.tagId);
+            zteam_deprotectHudg(interfaceBitm[i].hudGlobals.tagId);
+            zteam_changeTagClass(interfaceBitm[i].interfaceGoopMap1.tagId, BITM);
+            zteam_changeTagClass(interfaceBitm[i].interfaceGoopMap2.tagId, BITM);
+            zteam_changeTagClass(interfaceBitm[i].interfaceGoopMap3.tagId, BITM);
+            zteam_changeTagClass(interfaceBitm[i].localization.tagId, STR);
+            zteam_changeTagClass(interfaceBitm[i].motionSensorBlipBitmap.tagId, BITM);
+            zteam_changeTagClass(interfaceBitm[i].motionSensorSweepBitmap.tagId, BITM);
+            zteam_changeTagClass(interfaceBitm[i].motionSensorSweepBitmapMask.tagId, BITM);
+            zteam_changeTagClass(interfaceBitm[i].multiplayerHudBitmap.tagId, BITM);
+            zteam_changeTagClass(interfaceBitm[i].screenColorTable.tagId, COLO);
+        }
+        
+        Dependency *cameraTracks = translatePointer(matg.camera.offset);
+        for(uint32_t i=0;i<matg.camera.count;i++)
+            zteam_deprotectClass(cameraTracks[i].tagId, TRAK);
         
         MatgPlayerInformationDependencies *playerInfo = translatePointer(matg.playerInfo.offset);
         for(uint32_t i=0;i<matg.playerInfo.count;i++) {

@@ -404,6 +404,26 @@ typedef struct {
 } __attribute__((packed)) MatgMultiplayerInformationDependencies; //0xA0
 
 typedef struct {
+    Dependency fontSystem;
+    Dependency fontTerminal;
+    Dependency screenColorTable;
+    Dependency hudColorTable;
+    Dependency editorColorTable;
+    Dependency dialogColorTable;
+    Dependency hudGlobals;
+    Dependency motionSensorSweepBitmap;
+    Dependency motionSensorSweepBitmapMask;
+    Dependency multiplayerHudBitmap;
+    Dependency localization;
+    Dependency hudDigits;
+    Dependency motionSensorBlipBitmap;
+    Dependency interfaceGoopMap1;
+    Dependency interfaceGoopMap2;
+    Dependency interfaceGoopMap3;
+    char padding[0x2C];
+} __attribute__((packed)) MatgInterfaceBitmapsDependencies;
+
+typedef struct {
     char padding[0xF8];          //0x0
     TagReflexive sounds;         //0xF8  --TagCollection
     TagReflexive camera;         //0x104 --TagCollection
@@ -654,5 +674,53 @@ typedef struct {
     char padding5[0x88]; //0x1B8
     TagReflexive regions; //0x240
 } __attribute__((packed)) CollDependencies;
+
+typedef struct {
+    char padding[0x48]; //0x0
+    Dependency interfaceBitmap; //0x48
+    char padding1[0x24]; //0x58
+    TagReflexive bgMutlitextureOverlay; //0x7C
+    char padding2[0x28]; //0x88
+    Dependency bgInterfaceBitmap; //0xB0
+    char padding3[0x24]; //0xC0
+    TagReflexive fgMultitextureOverlay; //0xE4
+    char padding4[0x5C]; //0xF0
+    Dependency overlayBitmap; //0x14C
+    
+} __attribute__((packed)) GrhiDependencies;
+
+typedef struct {
+    char padding[0x3C];
+    Dependency boldFont;
+    Dependency italicFont;
+    Dependency condenseFont;
+    Dependency underlineFont;
+} __attribute__((packed)) FontDependencies;
+
+typedef struct {
+    Dependency digitsBitmap;
+} __attribute__((packed)) HudDependencies;
+
+typedef struct {
+    char padding[0x48]; //0x0
+    Dependency singlePlayerFont; //0x48
+    Dependency multiPlayerFont; //0x58
+    char padding1[0x2C]; //0x68
+    Dependency iconMessageText; //0x94
+    Dependency iconBitmap; //0xA4
+    Dependency alternateIconText; //0xB4
+    char padding2[0x2C]; //0xC4
+    Dependency hudMessages; //0xF0
+    char padding3[0x50]; //0x100
+    Dependency waypointArrowBitmap; //0x150
+    char padding4[0x160]; //0x160
+    Dependency defaultWeaponHud; //0x2C0
+    char padding5[0x68]; //0x2D0
+    Dependency damageIndicatorBitmap; //0x338
+    char padding6[0x80]; //0x348
+    Dependency carnageReport; //0x3C8
+    char padding7[0x8]; //0x3D8
+    Dependency checkpointSound; //0x3E0
+} __attribute__((packed)) HudgDependencies;
 
 #endif
