@@ -398,8 +398,8 @@ typedef struct {
     Dependency hillShader;       //0x2C  shdr
     Dependency flagShader;       //0x3C  shdr
     Dependency ball;             //0x4C  weap <--
-    Dependency sounds;           //0x5C  --TagCollection
-    char padding[0x34];          //0x6C
+    TagReflexive sounds;         //0x5C  --TagCollection
+    char padding[0x38];          //0x68
 } __attribute__((packed)) MatgMultiplayerInformationDependencies; //0xA0
 
 typedef struct {
@@ -433,6 +433,17 @@ typedef struct {
     Dependency nightVisionOffEffect; //0x58
     char padding2[0x58]; //0x68
 } __attribute__((packed)) MatgFPInterface;
+
+typedef struct {
+    char padding[0x10]; //0x0
+    Dependency fallingDamage; //0x10
+    char padding1[0xC]; //0x20
+    Dependency distanceDamage; //0x2C
+    Dependency vehicleEnviroCollisionDamage; //0x3C
+    Dependency vehicleKilledDamage; //0x4C
+    Dependency vehicleCollisionDamage; //0x5C
+    Dependency flameDeathDamage; //0x6C
+} __attribute__((packed)) MatgFallingDamage;
 
 typedef struct {
     char padding[0xF8];          //0x0
@@ -891,5 +902,10 @@ typedef struct{
     char padding1[0xC]; //0x38
     Dependency blueShader; //0x44
 } __attribute__((packed)) FlagDependencies;
+
+typedef struct {
+    char padding[0x114];
+    Dependency sound;
+} __attribute__((packed)) JptDependencies;
 
 #endif
