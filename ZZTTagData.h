@@ -745,4 +745,8 @@ typedef struct {
     Dependency shaderMap; //0xD8
 } __attribute__((packed)) DecaDependencies;
 
+typedef struct {
+    
+} __attribute__((packed)) WphiDependencies;
+
 #endif

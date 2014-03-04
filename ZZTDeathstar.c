@@ -76,6 +76,7 @@ static void zteam_deprotectHudDigits(TagID tagId);
 static void zteam_deprotectHudg(TagID tagId);
 static void zteam_deprotectSky(TagID tagId);
 static void zteam_deprotectDeca(TagID tagId);
+static void zteam_deprotectWphi(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -367,6 +368,14 @@ static inline void zteam_deprotectUnhiMultitextureOverlay(TagReflexive reflexive
     }
 }
 
+static void zteam_deprotectWphi(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, WPHI);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    
+}
+
 static void zteam_deprotectUnhi(TagID tagId) {
     if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
@@ -415,7 +424,8 @@ static void zteam_deprotectObjectTag(TagID tagId) {
         *(uint32_t *)&SSCE
     };
     
-    ObjeDependencies object = *( ObjeDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    void *objectTag = translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    ObjeDependencies object = *( ObjeDependencies *)objectTag;
     
     if(object.tagObjectType > sizeof(tagClasses) / 0x4)
     {
@@ -452,8 +462,16 @@ static void zteam_deprotectObjectTag(TagID tagId) {
         }
     }
     
+    if(object.tagObjectType == OBJECT_WEAP || object.tagObjectType == OBJECT_EQIP) {
+        ItemDependencies item = *( ItemDependencies *)objectTag;
+        zteam_deprotectFoot(item.materialEffects.tagId);
+        zteam_changeTagClass(item.collisionSound.tagId, SND);
+        zteam_deprotectClass(item.detonatingEffect.tagId,item.detonatingEffect.mainClass);
+        zteam_deprotectClass(item.detonationEffect.tagId,item.detonationEffect.mainClass);
+    }
+    
     if(object.tagObjectType == OBJECT_WEAP) {
-        WeapDependencies weap = *( WeapDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+        WeapDependencies weap = *( WeapDependencies *)objectTag;
         zteam_deprotectMod2(weap.fpModel.tagId);
         zteam_changeTagClass(weap.fpAnimation.tagId, ANTR);
         WeapTriggerDependencies *triggers = translatePointer(weap.triggers.offset);
@@ -470,6 +488,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
                 zteam_changeTagClass(firingEffects[fire].firingDamage.tagId, JPT);
             }
         }
+        zteam_deprotectWphi(weap.hud.tagId);
         zteam_deprotectClass(weap.detonationEffect.tagId, weap.detonationEffect.mainClass);
         zteam_deprotectClass(weap.lightOffEffect.tagId, weap.lightOffEffect.mainClass);
         zteam_deprotectClass(weap.lightOnEffect.tagId, weap.lightOnEffect.mainClass);
@@ -483,7 +502,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     }
     
     if(object.tagObjectType == OBJECT_VEHI || object.tagObjectType == OBJECT_BIPD) {
-        UnitDependencies unit = *( UnitDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+        UnitDependencies unit = *( UnitDependencies *)objectTag;
         UnitWeaponDependencies *weapons = ( UnitWeaponDependencies *)translatePointer(unit.weapons.offset);
         for(uint32_t i=0;i<unit.weapons.count;i++) {
             zteam_deprotectObjectTag(weapons[i].weapon.tagId);
@@ -517,7 +536,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     }
     
     if(object.tagObjectType == OBJECT_VEHI) {
-        VehiDependencies vehi = *(VehiDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+        VehiDependencies vehi = *(VehiDependencies *)objectTag;
         zteam_deprotectClass(vehi.effect.tagId,vehi.effect.mainClass);
         zteam_deprotectFoot(vehi.materialEffects.tagId);
         zteam_changeTagClass(vehi.crashSound.tagId, SND);
@@ -525,12 +544,12 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     }
     
     if(object.tagObjectType == OBJECT_BIPD) {
-        BipdDependencies bipd = *(BipdDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+        BipdDependencies bipd = *(BipdDependencies *)objectTag;
         zteam_deprotectFoot(bipd.materialEffects.tagId);
     }
     
     if(object.tagObjectType == OBJECT_PROJ) {
-        ProjDependencies proj = *(ProjDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+        ProjDependencies proj = *(ProjDependencies *)objectTag;
         zteam_deprotectClass(proj.superDetonation.tagId, proj.superDetonation.mainClass);
         zteam_deprotectClass(proj.superDetonation.tagId,proj.superDetonation.mainClass);
         zteam_changeTagClass(proj.attachedDamage.tagId, JPT);
@@ -558,9 +577,13 @@ static void zteam_deprotectMatgObjectTagCollection(TagReflexive reflexive) {
     }
 }
 
-static void zteam_deprotectItmc(TagID tag) {
-    ItmcDependencies itmc = *( ItmcDependencies *)translatePointer(tagArray[tag.tagTableIndex].dataOffset);
-    zteam_changeTagClass(tag,ITMC);
+static void zteam_deprotectItmc(TagID tagId) {
+    if(isNulledOut(tagId))
+        return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId,ITMC);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    ItmcDependencies itmc = *( ItmcDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     ItmcPermutationDependencies *itmcPerm = ( ItmcPermutationDependencies *)translatePointer(itmc.permutation.offset);
     for(uint32_t i=0;i<itmc.permutation.count;i++) {
         zteam_deprotectObjectTag(itmcPerm[i].dependency.tagId);
@@ -602,7 +625,7 @@ static void zteam_deprotectHudg(TagID tagId) {
     zteam_changeTagClass(hudg.carnageReport.tagId, BITM);
     zteam_changeTagClass(hudg.checkpointSound.tagId,SND);
     zteam_changeTagClass(hudg.damageIndicatorBitmap.tagId, BITM);
-    zteam_changeTagClass(hudg.defaultWeaponHud.tagId, WPHI);
+    zteam_deprotectWphi(hudg.defaultWeaponHud.tagId);
     zteam_changeTagClass(hudg.hudMessages.tagId, HMT);
     zteam_changeTagClass(hudg.iconBitmap.tagId, BITM);
     zteam_changeTagClass(hudg.iconMessageText.tagId, USTR);
@@ -858,6 +881,13 @@ MapData zteam_deprotect(MapData map)
     zteam_deprotectObjectPalette(scnrData.controlPalette);
     zteam_deprotectObjectPalette(scnrData.lifiPalette);
     zteam_deprotectObjectPalette(scnrData.sscePalette);
+    
+    ScnrStartingEquipment *equipment = (ScnrStartingEquipment *)translatePointer(scnrData.startingItmcs.offset);
+    for(uint32_t i=0;i<scnrData.startingItmcs.count;i++) {
+        for(int q=0;q<6;q++) {
+            zteam_deprotectItmc(equipment[i].equipment[q].tagId);
+        }
+    }
     
     ScnrSkies *skies = ( ScnrSkies *)translatePointer(scnrData.skies.offset);
     for(uint32_t i=0;i<scnrData.skies.count;i++) {
