@@ -649,6 +649,21 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     }
 }
 
+static void zteam_deprotectCont(TagID tagId) {
+    if(isNulledOut(tagId))
+        return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId,CONT);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    ContDependencies cont = *(ContDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_changeTagClass(cont.bitmap.tagId, BITM);
+    zteam_changeTagClass(cont.bitmap2.tagId, BITM);
+    ContPointStatesDependencies *cpphy = translatePointer(cont.pointStates.offset);
+    for(uint32_t i=0;i<cont.pointStates.count;i++) {
+        zteam_changeTagClass(cpphy[i].pphys.tagId, PPHY);
+    }
+}
+
 static void zteam_deprotectObjectPalette(TagReflexive reflexive) {
     ScnrPaletteDependency *palette = (ScnrPaletteDependency *)translatePointer(reflexive.offset);
     for(int i=0;i<reflexive.count;i++) {
@@ -747,14 +762,19 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
     }
     if(strncmp(class,EFFE,4) == 0) {
         zteam_deprotectEffe(tagId);
-        return;
     }
-    if(strncmp(class,DELA,4) == 0) {
+    else if(strncmp(class,DELA,4) == 0) {
         zteam_deprotectDeLa(tagId);
-        return;
     }
-    
-    zteam_changeTagClass(tagId, class);
+    else if(strncmp(class,CONT,4) == 0) {
+        zteam_deprotectCont(tagId);
+    }
+    else if(strncmp(class,DECA,4) == 0) {
+        zteam_deprotectDeca(tagId);
+    }
+    else {
+        zteam_changeTagClass(tagId, class);
+    }
 }
 
 static void zteam_deprotectGrhi(TagID tagId) {

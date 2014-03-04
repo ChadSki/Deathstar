@@ -851,4 +851,19 @@ typedef struct {
     TagReflexive childWidget; //0x3E0
 } __attribute__((packed)) DeLaDependencies;
 
+typedef struct{
+    char padding[0x10];
+    Dependency pphys;
+    char padding1[0x48];
+} __attribute__((packed)) ContPointStatesDependencies;
+
+typedef struct {
+    char padding[0x30]; //0x0
+    Dependency bitmap; //0x30
+    char padding1[0x90]; //0x40
+    Dependency bitmap2; //0xD0
+    char padding2[0x58]; //0xE0
+    TagReflexive pointStates; //0x138
+} __attribute__((packed)) ContDependencies;
+
 #endif
