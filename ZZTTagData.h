@@ -723,4 +723,18 @@ typedef struct {
     Dependency checkpointSound; //0x3E0
 } __attribute__((packed)) HudgDependencies;
 
+typedef struct {
+    Dependency lensFlare;
+    char padding[0x64];
+} __attribute__((packed)) SkyLensFlares;
+
+typedef struct {
+    Dependency model; //0x0
+    Dependency animation; //0x10
+    char padding[0x78];
+    Dependency fog; //0x98
+    char padding1[0x1C]; //0xA8
+    TagReflexive lensFlares; //0xC4
+} __attribute__((packed)) SkyDependencies;
+
 #endif

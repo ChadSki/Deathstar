@@ -74,6 +74,7 @@ static void zteam_deprotectGrhi(TagID tagId);
 static void zteam_deprotectFont(TagID tagId);
 static void zteam_deprotectHudDigits(TagID tagId);
 static void zteam_deprotectHudg(TagID tagId);
+static void zteam_deprotectSky(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -687,6 +688,21 @@ static bool classAutogeneric(uint32_t class) {
     return false;
 }
 
+static void zteam_deprotectSky(TagID tagId) {
+    if(isNulledOut(tagId))
+        return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, SKY);
+    SkyDependencies sky = *(SkyDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_deprotectMod2(sky.model.tagId);
+    zteam_changeTagClass(sky.animation.tagId, ANTR);
+    zteam_changeTagClass(sky.fog.tagId, FOG);
+    SkyLensFlares *lensFlares = (SkyLensFlares *)translatePointer(sky.lensFlares.offset);
+    for(uint32_t i=0;i<sky.lensFlares.count;i++) {
+        zteam_deprotectClass(lensFlares[i].lensFlare.tagId,lensFlares[i].lensFlare.mainClass);
+    }
+}
+
 #define MATCHING_THRESHOLD 0.7
 #define MAX_TAG_NAME_SIZE 0x20
 
@@ -834,7 +850,7 @@ MapData zteam_deprotect(MapData map)
     
     ScnrSkies *skies = ( ScnrSkies *)translatePointer(scnrData.skies.offset);
     for(uint32_t i=0;i<scnrData.skies.count;i++) {
-        zteam_changeTagClass(skies[i].sky.tagId, SKY);
+        zteam_deprotectSky(skies[i].sky.tagId);
     }
     
     ScnrBSPs *bsps = ( ScnrBSPs *)translatePointer(scnrData.BSPs.offset);
