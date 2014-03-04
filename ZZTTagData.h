@@ -604,7 +604,7 @@ typedef struct {
     Dependency mapSecondary; //0x74
     Dependency mapTertiary; //0x84
     char padding1[0x14C]; //0x94
-} __attribute__((packed)) UnhiMultitextureOverlay;
+} __attribute__((packed)) MultitextureOverlay;
 
 typedef struct {
     Dependency sound; //0x0
@@ -746,7 +746,41 @@ typedef struct {
 } __attribute__((packed)) DecaDependencies;
 
 typedef struct {
-    
+    char padding[0x48]; //0x0
+    Dependency bitmap; //0x48
+    char padding1[0x5C];
+} __attribute__((packed)) WphiMeterElements; //0xB4
+typedef struct {
+    char padding[0x48]; //0x0
+    Dependency bitmap; //0x48
+    char padding1[0x24]; //0x58
+    TagReflexive multitextureOverlay; //0x7C
+    char padding2[0x2C];
+} __attribute__((packed)) WphiStaticElements; //0xB4
+
+typedef struct {
+    char padding[0x24]; //0x0
+    Dependency bitmap; //0x24
+    char padding1[0x34]; //0x34
+} __attribute__((packed)) WphiOverlayElements;
+
+typedef struct {
+    char padding[0x18]; //0x0
+    Dependency maskFullscreen; //0x18
+    Dependency maskSplitscreen; //0x28
+    char padding1[0x104];
+} __attribute__((packed)) WphiScreenEffects;
+
+typedef struct {
+    Dependency childHud; //0x0
+    char padding[0x50]; //0x10
+    TagReflexive staticElements; //0x60
+    TagReflexive meterElements; //0x6C
+    char padding1[0xC]; //0x78
+    TagReflexive crosshairs; //0x84
+    TagReflexive overlayElements; //0x90
+    char padding2[0x10]; //0x9C
+    TagReflexive screenEffect; //0xAC
 } __attribute__((packed)) WphiDependencies;
 
 #endif

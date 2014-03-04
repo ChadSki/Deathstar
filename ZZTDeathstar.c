@@ -150,6 +150,15 @@ static void zteam_changeTagClass(TagID tagId,const char *class) {
     tagArray[tagId.tagTableIndex].classA = *(uint32_t *)(class);
 }
 
+static inline void zteam_deprotectMultitextureOverlay(TagReflexive reflexive) {
+    MultitextureOverlay *overlay = (MultitextureOverlay *)translatePointer(reflexive.offset);
+    for(uint32_t i=0;i<reflexive.count;i++) {
+        zteam_changeTagClass(overlay[i].mapPrimary.tagId, BITM);
+        zteam_changeTagClass(overlay[i].mapSecondary.tagId, BITM);
+        zteam_changeTagClass(overlay[i].mapTertiary.tagId,BITM);
+    }
+}
+
 static void zteam_deprotectColl(TagID tagId) {
     if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
@@ -359,12 +368,10 @@ static void zteam_deprotectDeca(TagID tagId) {
     zteam_changeTagClass(deca.shaderMap.tagId, BITM);
 }
 
-static inline void zteam_deprotectUnhiMultitextureOverlay(TagReflexive reflexive) {
-    UnhiMultitextureOverlay *overlay = (UnhiMultitextureOverlay *)translatePointer(reflexive.offset);
-    for(uint32_t i=0;i<reflexive.count;i++) {
-        zteam_changeTagClass(overlay[i].mapPrimary.tagId, BITM);
-        zteam_changeTagClass(overlay[i].mapSecondary.tagId, BITM);
-        zteam_changeTagClass(overlay[i].mapTertiary.tagId,BITM);
+static inline void zteam_deprotectWphiOverlay(TagReflexive overlay) {
+    WphiOverlayElements *wphiOverlay = translatePointer(overlay.offset);
+    for(uint32_t i=0;i<overlay.count;i++) {
+        zteam_changeTagClass(wphiOverlay[i].bitmap.tagId, BITM);
     }
 }
 
@@ -373,6 +380,26 @@ static void zteam_deprotectWphi(TagID tagId) {
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, WPHI);
     deprotectedTags[tagId.tagTableIndex] = true;
+    WphiDependencies wphi = *(WphiDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    WphiMeterElements *wphiME = translatePointer(wphi.meterElements.offset);
+    for(uint32_t i=0;i<wphi.meterElements.count;i++) {
+        zteam_changeTagClass(wphiME[i].bitmap.tagId, BITM);
+    }
+    
+    WphiStaticElements *wphiSE = translatePointer(wphi.staticElements.offset);
+    for(uint32_t i=0;i<wphi.staticElements.count;i++) {
+        zteam_changeTagClass(wphiSE[i].bitmap.tagId, BITM);
+        zteam_deprotectMultitextureOverlay(wphiSE[i].multitextureOverlay);
+    }
+    zteam_deprotectWphi(wphi.childHud.tagId);
+    zteam_deprotectWphiOverlay(wphi.overlayElements);
+    zteam_deprotectWphiOverlay(wphi.crosshairs);
+    
+    WphiScreenEffects *screenEffects = translatePointer(wphi.screenEffect.offset);
+    for(uint32_t i=0;i<wphi.screenEffect.count;i++) {
+        zteam_changeTagClass(screenEffects[i].maskFullscreen.tagId, BITM);
+        zteam_changeTagClass(screenEffects[i].maskSplitscreen.tagId, BITM);
+    }
     
 }
 
@@ -382,12 +409,12 @@ static void zteam_deprotectUnhi(TagID tagId) {
     zteam_changeTagClass(tagId, UNHI);
     deprotectedTags[tagId.tagTableIndex] = true;
     UnhiDependencies unhi = *(UnhiDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-    zteam_deprotectUnhiMultitextureOverlay(unhi.auxOverlayMulitextureOverlay);
-    zteam_deprotectUnhiMultitextureOverlay(unhi.healthBigMultitextureOverlay);
-    zteam_deprotectUnhiMultitextureOverlay(unhi.hudBgMultitextureOverlay);
-    zteam_deprotectUnhiMultitextureOverlay(unhi.motionSensorBgMultitextureOverlay);
-    zteam_deprotectUnhiMultitextureOverlay(unhi.motionSensorFgMultitextureOverlay);
-    zteam_deprotectUnhiMultitextureOverlay(unhi.shieldBgMultitextureOverlay);
+    zteam_deprotectMultitextureOverlay(unhi.auxOverlayMulitextureOverlay);
+    zteam_deprotectMultitextureOverlay(unhi.healthBigMultitextureOverlay);
+    zteam_deprotectMultitextureOverlay(unhi.hudBgMultitextureOverlay);
+    zteam_deprotectMultitextureOverlay(unhi.motionSensorBgMultitextureOverlay);
+    zteam_deprotectMultitextureOverlay(unhi.motionSensorFgMultitextureOverlay);
+    zteam_deprotectMultitextureOverlay(unhi.shieldBgMultitextureOverlay);
     zteam_changeTagClass(unhi.healthInterfaceBitmap.tagId, BITM);
     zteam_changeTagClass(unhi.healthMeterBitmap.tagId, BITM);
     zteam_changeTagClass(unhi.hudinterfaceBitmap.tagId, BITM);
@@ -677,8 +704,8 @@ static void zteam_deprotectGrhi(TagID tagId) {
     zteam_changeTagClass(grhi.bgInterfaceBitmap.tagId, BITM);
     zteam_changeTagClass(grhi.interfaceBitmap.tagId, BITM);
     zteam_changeTagClass(grhi.overlayBitmap.tagId, BITM);
-    zteam_deprotectUnhiMultitextureOverlay(grhi.bgMutlitextureOverlay);
-    zteam_deprotectUnhiMultitextureOverlay(grhi.fgMultitextureOverlay);
+    zteam_deprotectMultitextureOverlay(grhi.bgMutlitextureOverlay);
+    zteam_deprotectMultitextureOverlay(grhi.fgMultitextureOverlay);
 }
 
 static void zteam_deprotectHudDigits(TagID tagId) {
