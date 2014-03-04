@@ -791,4 +791,33 @@ typedef struct {
     TagReflexive sounds;
 } __attribute__((packed)) AntrDependencies;
 
+typedef struct {
+    char padding[0x10]; //0x0
+    Dependency sounds[0x3]; //0x10
+    char padding1[0x30]; //0x40
+    Dependency sounds1[0xE]; //0x70
+    char padding2[0x10]; //0x150
+    Dependency sounds2[0x4]; //0x160
+    char padding3[0x40]; //0x1A0
+    Dependency sounds3[0x11]; //0x1E0
+    char padding4[0x30]; //0x2F0
+    Dependency sounds4[0x1C]; //0x320
+    char padding5[0x30]; //0x4E0
+    Dependency sounds5[0xD]; //0x510
+    char padding6[0x30]; //0x5E0
+    Dependency sounds6[0xA]; //0x610
+    char padding7[0x20]; //0x6B0
+    Dependency sounds7[0xD]; //0x6D0
+    char padding8[0x20];//0x7A0
+    Dependency sounds8[0x15]; //0x7C0
+    char padding9[0x40]; //0x910
+    Dependency sounds9[0x17]; //0x950
+    char padding10[0x60]; //0xAC0
+    Dependency sounds10[0x7]; //0xB20
+    char padding11[0x40]; //0xB90
+    Dependency sounds11[0x5]; //0xBD0
+    char padding12[0x40]; //0xC20
+    Dependency sounds12[0x8]; //0xC60
+} __attribute__((packed)) UdlgDependencies;
+
 #endif

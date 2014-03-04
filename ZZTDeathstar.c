@@ -160,6 +160,12 @@ static inline void zteam_deprotectMultitextureOverlay(TagReflexive reflexive) {
     }
 }
 
+static inline void zteam_deprotectDependencyArray(Dependency *tags,uint32_t count, char *class) {
+    for(uint32_t i=0;i<count;i++) {
+        zteam_changeTagClass(tags[i].tagId, class);
+    }
+}
+
 static void zteam_deprotectColl(TagID tagId) {
     if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
@@ -445,6 +451,29 @@ static void zteam_deprotectUnhi(TagID tagId) {
         zteam_changeTagClass(sounds[i].sound.tagId, sounds[i].sound.mainClass);
     }
 }
+
+static void zteam_deprotectUdlg(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, UDLG);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    UdlgDependencies udlg = *(UdlgDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_deprotectDependencyArray(udlg.sounds,0x3,SND);
+    zteam_deprotectDependencyArray(udlg.sounds1,0xE,SND);
+    zteam_deprotectDependencyArray(udlg.sounds2,0x4,SND);
+    zteam_deprotectDependencyArray(udlg.sounds3,0x11,SND);
+    zteam_deprotectDependencyArray(udlg.sounds4,0x1C,SND);
+    zteam_deprotectDependencyArray(udlg.sounds5,0xD,SND);
+    zteam_deprotectDependencyArray(udlg.sounds6,0xA,SND);
+    zteam_deprotectDependencyArray(udlg.sounds7,0xD,SND);
+    zteam_deprotectDependencyArray(udlg.sounds8,0x15,SND);
+    zteam_deprotectDependencyArray(udlg.sounds9,0x17,SND);
+    zteam_deprotectDependencyArray(udlg.sounds10,0x7,SND);
+    zteam_deprotectDependencyArray(udlg.sounds11,0x5,SND);
+    zteam_deprotectDependencyArray(udlg.sounds12,0x8,SND);
+    
+}
+
 static void zteam_deprotectObjectTag(TagID tagId) {
     if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
@@ -574,9 +603,9 @@ static void zteam_deprotectObjectTag(TagID tagId) {
                 zteam_deprotectUnhi(unhi[umhi].hud.tagId);
             }
         }
-        //UnitDialogues *dialogues = translatePointer(unit.unitDialogue.offset);
+        UnitDialogues *dialogues = translatePointer(unit.unitDialogue.offset);
         for(uint32_t i=0;i<unit.unitDialogue.count;i++) {
-            
+            zteam_deprotectUdlg(dialogues[i].dialogue.tagId);
         }
         UnitNewHUDDependencies *unhis = translatePointer(unit.unitHud.offset);
         for(uint32_t i=0;i<unit.unitHud.count;i++) {
@@ -993,9 +1022,7 @@ MapData zteam_deprotect(MapData map)
         }
         
         Dependency *cameraTracks = translatePointer(matg.camera.offset);
-        for(uint32_t i=0;i<matg.camera.count;i++)
-            zteam_deprotectClass(cameraTracks[i].tagId, TRAK);
-        
+        zteam_deprotectDependencyArray(cameraTracks, matg.camera.count, TRAK);
         MatgPlayerInformationDependencies *playerInfo = translatePointer(matg.playerInfo.offset);
         for(uint32_t i=0;i<matg.playerInfo.count;i++) {
             zteam_deprotectObjectTag(playerInfo[i].unit.tagId);
