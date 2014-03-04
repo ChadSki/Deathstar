@@ -105,9 +105,7 @@ typedef struct {
     Dependency reloadingEffect;  //0x38 effe
     Dependency chamberingEffect; //0x48 effe
     char padding1[0xC];          //0x58
-    uint32_t magazinesCount;     //0x64
-    uint32_t magazinesOffset;    //0x68
-    char padding2[0x4];          //0x6C
+    TagReflexive weapMagazineEquipment; //0x64
 } __attribute__((packed)) WeapMagazineDependencies; //0x70
 
 typedef struct {
@@ -337,6 +335,7 @@ typedef struct {
     Dependency equipment[0x6];   //0x3C
     char padding1[0x30];         //0x9C
 } __attribute__((packed)) ScnrStartingEquipment;
+
 typedef struct {
     Dependency unknown[0x3];     //0x0   sbsp
     TagReflexive skies;          //0x30
@@ -402,6 +401,26 @@ typedef struct {
     Dependency sounds;           //0x5C  --TagCollection
     char padding[0x34];          //0x6C
 } __attribute__((packed)) MatgMultiplayerInformationDependencies; //0xA0
+
+typedef struct {
+    Dependency fontSystem;
+    Dependency fontTerminal;
+    Dependency screenColorTable;
+    Dependency hudColorTable;
+    Dependency editorColorTable;
+    Dependency dialogColorTable;
+    Dependency hudGlobals;
+    Dependency motionSensorSweepBitmap;
+    Dependency motionSensorSweepBitmapMask;
+    Dependency multiplayerHudBitmap;
+    Dependency localization;
+    Dependency hudDigits;
+    Dependency motionSensorBlipBitmap;
+    Dependency interfaceGoopMap1;
+    Dependency interfaceGoopMap2;
+    Dependency interfaceGoopMap3;
+    char padding[0x2C];
+} __attribute__((packed)) MatgInterfaceBitmapsDependencies;
 
 typedef struct {
     char padding[0xF8];          //0x0
@@ -583,7 +602,7 @@ typedef struct {
     Dependency mapSecondary; //0x74
     Dependency mapTertiary; //0x84
     char padding1[0x14C]; //0x94
-} __attribute__((packed)) UnhiMultitextureOverlay;
+} __attribute__((packed)) MultitextureOverlay;
 
 typedef struct {
     Dependency sound; //0x0
@@ -654,5 +673,122 @@ typedef struct {
     char padding5[0x88]; //0x1B8
     TagReflexive regions; //0x240
 } __attribute__((packed)) CollDependencies;
+
+typedef struct {
+    char padding[0x48]; //0x0
+    Dependency interfaceBitmap; //0x48
+    char padding1[0x24]; //0x58
+    TagReflexive bgMutlitextureOverlay; //0x7C
+    char padding2[0x28]; //0x88
+    Dependency bgInterfaceBitmap; //0xB0
+    char padding3[0x24]; //0xC0
+    TagReflexive fgMultitextureOverlay; //0xE4
+    char padding4[0x5C]; //0xF0
+    Dependency overlayBitmap; //0x14C
+    
+} __attribute__((packed)) GrhiDependencies;
+
+typedef struct {
+    char padding[0x3C];
+    Dependency boldFont;
+    Dependency italicFont;
+    Dependency condenseFont;
+    Dependency underlineFont;
+} __attribute__((packed)) FontDependencies;
+
+typedef struct {
+    Dependency digitsBitmap;
+} __attribute__((packed)) HudDependencies;
+
+typedef struct {
+    char padding[0x48]; //0x0
+    Dependency singlePlayerFont; //0x48
+    Dependency multiPlayerFont; //0x58
+    char padding1[0x2C]; //0x68
+    Dependency iconMessageText; //0x94
+    Dependency iconBitmap; //0xA4
+    Dependency alternateIconText; //0xB4
+    char padding2[0x2C]; //0xC4
+    Dependency hudMessages; //0xF0
+    char padding3[0x50]; //0x100
+    Dependency waypointArrowBitmap; //0x150
+    char padding4[0x160]; //0x160
+    Dependency defaultWeaponHud; //0x2C0
+    char padding5[0x68]; //0x2D0
+    Dependency damageIndicatorBitmap; //0x338
+    char padding6[0x80]; //0x348
+    Dependency carnageReport; //0x3C8
+    char padding7[0x8]; //0x3D8
+    Dependency checkpointSound; //0x3E0
+} __attribute__((packed)) HudgDependencies;
+
+typedef struct {
+    Dependency lensFlare;
+    char padding[0x64];
+} __attribute__((packed)) SkyLensFlares;
+
+typedef struct {
+    Dependency model; //0x0
+    Dependency animation; //0x10
+    char padding[0x78];
+    Dependency fog; //0x98
+    char padding1[0x1C]; //0xA8
+    TagReflexive lensFlares; //0xC4
+} __attribute__((packed)) SkyDependencies;
+
+typedef struct {
+    char padding[0x8]; //0x0
+    Dependency nextDecal; //0x8
+    char padding1[0xC0]; //0x18
+    Dependency shaderMap; //0xD8
+} __attribute__((packed)) DecaDependencies;
+
+typedef struct {
+    char padding[0x48]; //0x0
+    Dependency bitmap; //0x48
+    char padding1[0x5C];
+} __attribute__((packed)) WphiMeterElements; //0xB4
+typedef struct {
+    char padding[0x48]; //0x0
+    Dependency bitmap; //0x48
+    char padding1[0x24]; //0x58
+    TagReflexive multitextureOverlay; //0x7C
+    char padding2[0x2C];
+} __attribute__((packed)) WphiStaticElements; //0xB4
+
+typedef struct {
+    char padding[0x24]; //0x0
+    Dependency bitmap; //0x24
+    char padding1[0x34]; //0x34
+} __attribute__((packed)) WphiOverlayElements;
+
+typedef struct {
+    char padding[0x18]; //0x0
+    Dependency maskFullscreen; //0x18
+    Dependency maskSplitscreen; //0x28
+    char padding1[0x104];
+} __attribute__((packed)) WphiScreenEffects;
+
+typedef struct {
+    Dependency childHud; //0x0
+    char padding[0x50]; //0x10
+    TagReflexive staticElements; //0x60
+    TagReflexive meterElements; //0x6C
+    char padding1[0xC]; //0x78
+    TagReflexive crosshairs; //0x84
+    TagReflexive overlayElements; //0x90
+    char padding2[0x10]; //0x9C
+    TagReflexive screenEffect; //0xAC
+} __attribute__((packed)) WphiDependencies;
+
+typedef struct {
+    Dependency sound;
+    uint32_t padding;
+} __attribute__((packed)) AntrSoundsDependencies;
+
+typedef struct {
+    char padding[0x54];
+    TagReflexive sounds;
+} __attribute__((packed)) AntrDependencies;
 
 #endif
