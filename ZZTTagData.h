@@ -820,4 +820,35 @@ typedef struct {
     Dependency sounds12[0x8]; //0xC60
 } __attribute__((packed)) UdlgDependencies;
 
+typedef struct {
+    Dependency widget;
+    char padding[0x40];
+} __attribute__((packed)) DeLaChildWidgets;
+
+typedef struct {
+    char padding[0x8]; //0x0
+    Dependency widgetTag; //0x8
+    Dependency soundTag; //0x18
+    char padding1[0x20];
+} __attribute__((packed)) DeLaEventHandler;
+
+typedef struct {
+    char padding[0x38]; //0x0
+    Dependency backgroundBitmap; //0x38
+    char padding1[0xC]; //0x48
+    TagReflexive eventHander; //0x54
+    char padding2[0x8C]; //0x60
+    Dependency unicodeStrings; //0xEC
+    Dependency font; //0xFC
+    char padding3[0x48]; //0x10C
+    Dependency headerBitmap; //0x154
+    Dependency footerBitmap; //0x164
+    char padding4[0x30]; //0x174
+    Dependency extendedDescriptionWidget; //0x1A4
+    char padding5[0x120]; //0x1B4
+    TagReflexive conditionalWidget; //0x2D4
+    char padding6[0x100]; //0x2E0
+    TagReflexive childWidget; //0x3E0
+} __attribute__((packed)) DeLaDependencies;
+
 #endif

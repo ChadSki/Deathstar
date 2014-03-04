@@ -78,6 +78,7 @@ static void zteam_deprotectSky(TagID tagId);
 static void zteam_deprotectDeca(TagID tagId);
 static void zteam_deprotectWphi(TagID tagId);
 static void zteam_deprotectAntr(TagID tagId);
+static void zteam_deprotectDeLa(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -161,8 +162,15 @@ static inline void zteam_deprotectMultitextureOverlay(TagReflexive reflexive) {
 }
 
 static inline void zteam_deprotectDependencyArray(Dependency *tags,uint32_t count, char *class) {
-    for(uint32_t i=0;i<count;i++) {
-        zteam_changeTagClass(tags[i].tagId, class);
+    if(class == NULL) {
+        for(uint32_t i=0;i<count;i++) {
+            zteam_deprotectClass(tags[i].tagId, tags[i].mainClass);
+        }
+    }
+    else {
+        for(uint32_t i=0;i<count;i++) {
+            zteam_changeTagClass(tags[i].tagId, class);
+        }
     }
 }
 
@@ -741,6 +749,10 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
         zteam_deprotectEffe(tagId);
         return;
     }
+    if(strncmp(class,DELA,4) == 0) {
+        zteam_deprotectDeLa(tagId);
+        return;
+    }
     
     zteam_changeTagClass(tagId, class);
 }
@@ -759,6 +771,35 @@ static void zteam_deprotectGrhi(TagID tagId) {
     zteam_deprotectMultitextureOverlay(grhi.fgMultitextureOverlay);
 }
 
+static inline void zteam_deprotectDeLaChildWidget(TagReflexive child) {
+    DeLaChildWidgets *delaChild = translatePointer(child.offset);
+    for(uint32_t i=0;i<child.count;i++) {
+        zteam_deprotectDeLa(delaChild[i].widget.tagId);
+    }
+}
+
+static void zteam_deprotectDeLa(TagID tagId) {
+    if(isNulledOut(tagId))
+        return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, DELA);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    DeLaDependencies dela = *(DeLaDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_changeTagClass(dela.backgroundBitmap.tagId, BITM);
+    zteam_deprotectDeLa(dela.extendedDescriptionWidget.tagId);
+    zteam_changeTagClass(dela.font.tagId, FONT);
+    zteam_changeTagClass(dela.unicodeStrings.tagId, USTR);
+    zteam_changeTagClass(dela.footerBitmap.tagId,BITM);
+    zteam_changeTagClass(dela.headerBitmap.tagId,BITM);
+    zteam_deprotectDeLaChildWidget(dela.childWidget);
+    zteam_deprotectDeLaChildWidget(dela.conditionalWidget);
+    DeLaEventHandler *events = translatePointer(dela.eventHander.offset);
+    for(uint32_t i=0;i<dela.eventHander.count;i++) {
+        zteam_changeTagClass(events[i].soundTag.tagId, SND);
+        zteam_deprotectDeLa(events[i].widgetTag.tagId);
+    }
+}
+
 static void zteam_deprotectHudDigits(TagID tagId) {
     if(isNulledOut(tagId))
         return;
@@ -771,12 +812,8 @@ static void zteam_deprotectHudDigits(TagID tagId) {
 static bool classCanBeDeprotected(uint32_t class) {
     
     uint32_t tagClasses[] = { //these tags should never ever be touched.
-        *(uint32_t *)&DEVC,
         *(uint32_t *)&MATG,
-        *(uint32_t *)&DELA,
-        *(uint32_t *)&SOUL,
         *(uint32_t *)&TAGC,
-        *(uint32_t *)&USTR
     };
     for(int i=0;i<sizeof(tagClasses)/4;i++) {
         if(class == tagClasses[i]) return false;
@@ -792,6 +829,9 @@ static bool classAutogeneric(uint32_t class) {
         *(uint32_t *)&SBSP,
         *(uint32_t *)&SCNR,
         *(uint32_t *)&ITMC,
+        *(uint32_t *)&USTR,
+        *(uint32_t *)&SOUL,
+        *(uint32_t *)&DELA,
         *(uint32_t *)&FONT
     };
     for(int i=0;i<sizeof(tagClasses)/4;i++) {
@@ -1034,6 +1074,22 @@ MapData zteam_deprotect(MapData map)
             zteam_deprotectObjectTag(multiplayerInfo[i].flag.tagId);
             zteam_deprotectObjectTag(multiplayerInfo[i].ball.tagId);
             zteam_deprotectMatgObjectTagCollection(multiplayerInfo[i].vehicles);
+        }
+    }
+    
+    for(uint32_t i=0;i<tagCount;i++) {
+        if(tagArray[i].classA == *(uint32_t *)&TAGC) {
+            TagReflexive tagc = *(TagReflexive *)translatePointer(tagArray[i].dataOffset);
+            Dependency *tags = translatePointer(tagc.offset);
+            zteam_deprotectDependencyArray(tags, tagc.count, NULL);
+        }
+    }
+    
+    for(uint32_t i=0;i<tagCount;i++) {
+        if(tagArray[i].classA == *(uint32_t *)&SOUL) {
+            TagReflexive Soul = *(TagReflexive *)translatePointer(tagArray[i].dataOffset);
+            Dependency *tags = translatePointer(Soul.offset);
+            zteam_deprotectDependencyArray(tags, Soul.count, NULL);
         }
     }
     
