@@ -86,7 +86,7 @@
 #define SNDE "edns"
 #define SOSO "osos"
 #define SOTR "rtos"
-#define SOUL "luos"
+#define SOUL "luoS"
 #define SPLA "alps"
 #define SSCE "ecss"
 #define STR "#rts"
