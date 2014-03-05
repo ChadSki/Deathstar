@@ -88,6 +88,7 @@ static void zteam_deprotectRain(TagID tagId);
 static void zteam_deprotectLigh(TagID tagId);
 static void zteam_deprotectLens(TagID tagId);
 static void zteam_deprotectAnt(TagID tagId);
+static void zteam_deprotectPctl(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -188,6 +189,22 @@ static void zteam_deprotectLens(TagID tagId) {
     zteam_changeTagClass(tagId, LENS);
     LensDependency lens = *(LensDependency *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     zteam_changeTagClass(lens.bitmap.tagId, BITM);
+}
+static void zteam_deprotectPctl(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, PCTL);
+    PctlDependencies pctl = *(PctlDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_changeTagClass(pctl.pphys.tagId, PPHY);
+    PctlParticleTypes *types = translatePointer(pctl.particles.offset);
+    for(uint32_t i=0;i<pctl.particles.count;i++) {
+        PctlParticleStates *states = translatePointer(types[i].states.offset);
+        for(uint32_t q=0;q<types[i].states.count;q++) {
+            zteam_changeTagClass(states[q].bitmap2.tagId, BITM);
+            zteam_changeTagClass(states[q].bitmaps.tagId, BITM);
+            zteam_changeTagClass(states[q].pphys.tagId, PPHY);
+        }
+    }
 }
 static void zteam_deprotectAnt(TagID tagId) {
     if(isNulledOut(tagId)) return;
@@ -539,10 +556,11 @@ static void zteam_deprotectObjectTag(TagID tagId) {
     
     if(object.tagObjectType > sizeof(tagClasses) / 0x4)
     {
-        return; //failed to ID tag
+        zteam_changeTagClass(tagId, OBJE); //failed to ID tag
     }
-    
-    zteam_changeTagClass(tagId,(const char *)&tagClasses[object.tagObjectType]);
+    else {
+        zteam_changeTagClass(tagId,(const char *)&tagClasses[object.tagObjectType]);
+    }
     
     deprotectedTags[tagId.tagTableIndex] = true;
     
@@ -886,6 +904,9 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
     }
     else if(strncmp(class,ANT,4) ==0 ) {
         zteam_deprotectAnt(tagId);
+    }
+    else if(strncmp(class,PCTL,4) == 0) {
+        zteam_deprotectPctl(tagId);
     }
     else {
         zteam_changeTagClass(tagId, class);

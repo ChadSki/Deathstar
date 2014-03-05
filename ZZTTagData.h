@@ -1004,4 +1004,26 @@ typedef struct {
     Dependency physics;
 } __attribute__((packed)) AntDependency;
 
+typedef struct {
+    char padding[0x30]; //0x0
+    Dependency bitmaps; //0x30
+    char padding1[0x44]; //0x40
+    Dependency pphys; //0x84
+    char padding2[0x70]; //0x94
+    Dependency bitmap2; //0x104
+    char padding3[0x64]; //0x114
+} __attribute__((packed)) PctlParticleStates;
+
+typedef struct {
+    char padding[0x74]; //0x0
+    TagReflexive states; //0x74
+} __attribute__((packed)) PctlParticleTypes;
+
+typedef struct {
+    char padding[0x38]; //0x0
+    Dependency pphys; //0x38
+    char padding1[0x14]; //0x48
+    TagReflexive particles;
+} __attribute__((packed)) PctlDependencies;
+
 #endif
