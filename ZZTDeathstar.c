@@ -978,9 +978,9 @@ static void zteam_deprotectMetr(TagID tagId) {
         return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, METR);
-    MetrDependencies metr = *(MetrDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
-    zteam_changeTagClass(metr.sourceBitmaps.tagId, BITM);
-    zteam_changeTagClass(metr.stencilBitmaps.tagId, BITM);
+    //MetrDependencies metr = *(MetrDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    //zteam_changeTagClass(metr.sourceBitmaps.tagId, BITM); //not handled normally - unknown for now
+    //zteam_changeTagClass(metr.stencilBitmaps.tagId, BITM);
 }
 static void zteam_deprotectFog(TagID tagId) {
     if(isNulledOut(tagId)) return;

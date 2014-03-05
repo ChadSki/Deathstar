@@ -936,8 +936,8 @@ typedef struct {
 
 typedef struct {
     char padding[0x4];
-    Dependency stencilBitmaps;
-    Dependency sourceBitmaps;
+    //Dependency stencilBitmaps;
+    //Dependency sourceBitmaps;
 } __attribute__((packed)) MetrDependencies;
 
 typedef struct{
