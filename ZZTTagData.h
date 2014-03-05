@@ -1026,4 +1026,15 @@ typedef struct {
     TagReflexive particles;
 } __attribute__((packed)) PctlDependencies;
 
+typedef struct {
+    char padding[0x4]; //0x0
+    Dependency actr; //0x4
+    Dependency unit; //0x14
+    Dependency actv; //0x24
+    char padding1[0x30]; //0x34
+    Dependency weap; //0x64
+    char padding2[0x14C]; //0x74
+    Dependency eqip; //0x1C0
+} __attribute__((packed)) ActvDependencies;
+
 #endif

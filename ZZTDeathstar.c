@@ -89,6 +89,7 @@ static void zteam_deprotectLigh(TagID tagId);
 static void zteam_deprotectLens(TagID tagId);
 static void zteam_deprotectAnt(TagID tagId);
 static void zteam_deprotectPctl(TagID tagId);
+static void zteam_deprotectActv(TagID tagId);
 
 typedef enum {
     false = 0,
@@ -205,6 +206,18 @@ static void zteam_deprotectPctl(TagID tagId) {
             zteam_changeTagClass(states[q].pphys.tagId, PPHY);
         }
     }
+}
+static void zteam_deprotectActv(TagID tagId) {
+    if(isNulledOut(tagId)) return;
+    if(deprotectedTags[tagId.tagTableIndex]) return;
+    zteam_changeTagClass(tagId, ACTV);
+    deprotectedTags[tagId.tagTableIndex] = true;
+    ActvDependencies actv = *(ActvDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
+    zteam_deprotectActv(actv.actv.tagId);
+    zteam_changeTagClass(actv.actr.tagId, ACTV);
+    zteam_deprotectObjectTag(actv.eqip.tagId);
+    zteam_deprotectObjectTag(actv.unit.tagId);
+    zteam_deprotectObjectTag(actv.weap.tagId);
 }
 static void zteam_deprotectAnt(TagID tagId) {
     if(isNulledOut(tagId)) return;
@@ -636,6 +649,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
         zteam_changeTagClass(weap.pickupSound.tagId,SND);
         zteam_changeTagClass(weap.zoomInSound.tagId,SND);
         zteam_changeTagClass(weap.zoomOutSound.tagId,SND);
+        zteam_deprotectActv(weap.firingParams.tagId);
     }
     
     if(object.tagObjectType == OBJECT_VEHI || object.tagObjectType == OBJECT_BIPD) {
@@ -646,7 +660,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
         }
         zteam_deprotectClass(unit.integratedLight.tagId,unit.integratedLight.mainClass);
         zteam_deprotectJpt(unit.meleeDamage.tagId);
-        zteam_changeTagClass(unit.spawnedActor.tagId, ACTV);
+        zteam_deprotectActv(unit.spawnedActor.tagId);
         UnitCameraTrackDependencies *trak = translatePointer(unit.cameraTrack.offset);
         for(uint32_t i=0;i<unit.cameraTrack.count;i++) {
             zteam_changeTagClass(trak[i].cameraTrack.tagId,TRAK);
@@ -1200,6 +1214,11 @@ MapData zteam_deprotect(MapData map)
     Dependency *decas = (Dependency *)translatePointer(scnrData.decalPalette.offset);
     for(uint32_t i=0;i<scnrData.decalPalette.count;i++) {
         zteam_deprotectDeca(decas[i].tagId);
+    }
+    
+    Dependency *actvs = (Dependency *)translatePointer(scnrData.actorPalette.offset);
+    for(uint32_t i=0;i<scnrData.actorPalette.count;i++) {
+        zteam_deprotectActv(actvs[i].tagId);
     }
     
     ScnrNetgameItmcDependencies *itmcs = ( ScnrNetgameItmcDependencies *)translatePointer(scnrData.netgameItmcs.offset);
