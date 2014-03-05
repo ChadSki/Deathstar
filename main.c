@@ -26,7 +26,7 @@
 
 #include "ZZTDeathstar.h"
 
-#define PROG_VERSION "Deathstar 1.0a7"
+#define PROG_VERSION "Deathstar 1.0a8"
 #define PROG_CREATED "9th January, 2014"
 typedef enum {
     false = 0,
