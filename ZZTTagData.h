@@ -309,10 +309,55 @@ typedef struct {
     TagReflexive materials;      //0x14
 } __attribute__((packed)) SBSPLightmapsDependencies;
 typedef struct {
+    char padding[0x24]; //0x0
+    Dependency shader; //0x24
+    char padding1[0xC]; //0x34
+} __attribute__((packed)) SBSPClusterShaders; //0x40
+typedef struct {
+    char padding[0x28]; //0x0
+    TagReflexive lightmaps; //0x28
+    char padding1[0x1C]; //0x34
+    TagReflexive mirrors; //0x50
+    char padding2[0xC];
+} __attribute__((packed)) SBSPClusters;
+typedef struct {
+    char padding[0x20];
+    Dependency fog;
+    char padding1[0x58];
+} __attribute__((packed)) SBSPFogPallete;
+typedef struct {
+    char padding[0x20]; //0x0
+    Dependency particleSystem; //0x20
+    char padding1[0x50]; //0x30
+    Dependency wind; //0x80
+    char padding2[0x13C]; //0x90
+} __attribute__((packed)) SBSPWeatherPallete;
+typedef struct {
+    char padding[0x20]; //0x0
+    Dependency soundEnvironment; //0x20
+    char padding1[0x20]; //0x30
+} __attribute__((packed)) SBSPBackgroundSound;
+typedef struct {
+    char padding[0x20]; //0x0
+    Dependency soundEnvironment; //0x20
+    char padding1[0x44]; //0x30
+} __attribute__((packed)) SBSPEnvironmentPallete;
+typedef struct {
     char padding[0xBC];
     TagReflexive collMaterials;  //0xBC
     char padding1[0x54];
     TagReflexive lightmaps;      //0x11C
+    char padding2[0xC];
+    TagReflexive lensFlares; //0x134
+    char padding3[0xC];
+    TagReflexive clusters; //0x14C
+    char padding4[0x50];
+    TagReflexive fog;            //0x1A8
+    char padding5[0x18];         //0x1B4
+    TagReflexive weather;        //0x1CC
+    char padding6[0x3C];         //0x1D8
+    TagReflexive backgroundSound;//0x214
+    TagReflexive soundEnvironment;//0x220
 } __attribute__((packed)) SBSPDependencies;
 typedef struct {
     uint32_t fileOffset;         //0x0
@@ -907,5 +952,56 @@ typedef struct {
     char padding[0x114];
     Dependency sound;
 } __attribute__((packed)) JptDependencies;
+
+typedef struct {
+    char padding[0x30]; //0x0
+    Dependency start; //0x30
+    Dependency loop; //0x40
+    Dependency end; //0x50
+    char padding1[0x20]; //0x60
+    Dependency altLoop; //0x80
+    Dependency altEnd; //0x90
+} __attribute__((packed)) LsndTracks;
+
+typedef struct {
+    char padding[0x2C];
+    Dependency cdmg;
+    TagReflexive tracks;
+} __attribute__((packed)) LsndDependencies;
+
+typedef struct {
+    char padding[0xAC]; //0x0
+    Dependency pphys; //0xAC
+    char padding1[0xD8]; //0xBC
+    Dependency bitmap; //0x194
+    char padding2[0x50]; //0x1A4
+    Dependency bitmap1; //0x1F4
+    char padding3[0x58];
+} __attribute__((packed)) RainParticles;
+
+typedef struct {
+    char padding[0x24];
+    TagReflexive particles;
+} __attribute__((packed)) RainDependency;
+
+typedef struct {
+    char padding[0x64]; //0x0
+    Dependency primaryCubeMap; //0x64
+    char padding1[0x8]; //0x74
+    Dependency secondaryCubeMap; //0x7C
+    char padding2[0x20]; //0x8C
+    Dependency lens;
+} __attribute__((packed)) LighDependency;
+
+typedef struct {
+    char padding[0x20];
+    Dependency bitmap;
+} __attribute__((packed)) LensDependency;
+
+typedef struct {
+    char padding[0x20];
+    Dependency bitmap;
+    Dependency physics;
+} __attribute__((packed)) AntDependency;
 
 #endif
