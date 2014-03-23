@@ -26,13 +26,65 @@
 
 #include "ZZTDeathstar.h"
 
-#define PROG_VERSION "Deathstar 1.0a7"
+#define PROG_VERSION "Deathstar 1.0a8"
 #define PROG_CREATED "9th January, 2014"
 typedef enum {
     false = 0,
     true = 1
 } bool;
 
+typedef struct {
+    uint16_t tagTableIndex;
+    uint16_t tableIndex;
+} __attribute__((packed)) TagID;
+
+typedef struct {
+    uint32_t classA;
+    uint32_t classB;
+    uint32_t classC;
+    TagID identity;
+    uint32_t nameOffset;
+    uint32_t dataOffset;
+    uint32_t notInsideMap;
+    char padding[0x4];
+} __attribute__((packed)) MapTag;
+
+typedef struct {
+    uint32_t integrityHead;
+    uint32_t version;
+    uint32_t length;
+    uint32_t zero;
+    uint32_t indexOffset;
+    uint32_t metaSize;
+    char padding[0x8];
+    char name[0x20];
+    char builddate[0x20];
+    uint32_t type;
+    char zeroes2[0x198];
+    uint32_t integrityFoot;
+} __attribute__((packed)) HaloMapHeader;
+
+typedef struct {
+    uint32_t tagIndexOffset;
+    TagID scenarioTag;
+    uint32_t mapId;
+    uint32_t tagCount;
+    uint32_t vertexCount;
+    uint32_t vertexOffset;
+    uint32_t indicesCount;
+    uint32_t vertexSize;
+    uint32_t modelSize;
+    uint32_t tags;
+} __attribute__((packed)) HaloMapIndex;
+
+uint32_t swapEndian32(uint32_t integer) {
+    char *swappedValue = calloc(4,1);
+    swappedValue[3] = integer       & 0xFF;
+    swappedValue[2] = integer >> 8  & 0xFF;
+    swappedValue[1] = integer >> 16 & 0xFF;
+    swappedValue[0] = integer >> 24 & 0xFF;
+    return *(uint32_t *)swappedValue;
+}
 
 int main(int argc, const char * argv[])
 {
@@ -42,6 +94,7 @@ int main(int argc, const char * argv[])
             printf("deathstar --deprotect <map> [maps...] ; Deprotect map at path.\n");
             printf("deathstar --zteam <map> ; Only remove zteam protection.\n");
             printf("deathstar --name <map> [maps...]  ; Rename all tags to generic names.\n");
+            printf("deathstar --preview <map>  ; Removes zteam protection without saving map.\n");
             printf("\n");
             printf("Information\n");
             printf("deathstar --help [--argument]; View this list, or help on an argument.\n");
@@ -81,10 +134,63 @@ int main(int argc, const char * argv[])
             printf("Use deathstar --help --name for information on name.\n");
             printf("Use deathstar --help --zteam for information on zteam.\n");
         }
+        else if(strcmp(argv[2],"--preview") == 0) {
+            printf("Syntax: deathstar --preview <map>\n\n");
+            printf("Death Star will do z-team deprotection, but it won't save\n");
+            printf("the map. Instead, it will output the results.\n\n");
+            printf("Use deathstar --help --zteam for information on zteam.\n");
+        }
         else {
             printf("Unsupported help topic.\n");
         }
         return 0;
+    }
+    else if(strcmp(argv[1],"--preview") == 0) {
+        if(argc != 3) {
+            printf("Syntax: deathstar --preview <map>\n");
+            printf("Use deathstar --help --preview for more information.\n");
+            return 0;
+        }
+        MapData map = openMapAtPath(argv[2]);
+        if(map.error == MAP_INVALID_PATH) {
+            printf("Failed to open map at %s. Invalid path?\n",argv[2]);
+            return 0;
+        }
+        else if(map.error == MAP_INVALID_INDEX_POINTER) {
+            printf("Failed to open map. Path is valid, but map isn't.\n");
+            return 0;
+        }
+        MapData final_map = zteam_deprotect(map);
+        
+        HaloMapHeader *header = ((HaloMapHeader *)final_map.buffer);
+        HaloMapIndex *index = (HaloMapIndex *)(final_map.buffer + header->indexOffset);
+        uint32_t mapMagic = 0x40440000 - header->indexOffset;
+        
+        uint32_t tagsOffset = index->tagIndexOffset - mapMagic;
+        
+        MapTag *tagsOriginal = (MapTag *)(map.buffer + tagsOffset);
+        MapTag *tagsModified = (MapTag *)(final_map.buffer + tagsOffset);
+        
+        bool modification = false;
+        
+        for(uint32_t i=0;i<index->tagCount;i++) {
+            if(tagsModified[i].classA != tagsOriginal[i].classA) {
+                char *classOriginal = calloc(5,1);
+                char *classModified = calloc(5,1);
+                uint32_t class = swapEndian32(tagsOriginal[i].classA);
+                memcpy(classOriginal,&class,4);
+                class = swapEndian32(tagsModified[i].classA);
+                memcpy(classModified,&class,4);
+                printf("%s.%s -> %s\n",(char *)header + tagsModified[i].nameOffset - mapMagic,classOriginal,classModified);
+                free(classOriginal);
+                free(classModified);
+                modification = true;
+            }
+        }
+        if(!modification) {
+            printf("No changes were made.\n");
+        }
+        
     }
     else if(strcmp(argv[1],"--argument") == 0) {
         printf("Syynantax:as: -arrrar-gummeargmetnetn\n"); //Funny!

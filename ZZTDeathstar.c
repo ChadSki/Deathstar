@@ -214,7 +214,7 @@ static void zteam_deprotectActv(TagID tagId) {
     deprotectedTags[tagId.tagTableIndex] = true;
     ActvDependencies actv = *(ActvDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     zteam_deprotectActv(actv.actv.tagId);
-    zteam_changeTagClass(actv.actr.tagId, ACTV);
+    zteam_changeTagClass(actv.actr.tagId, ACTR);
     zteam_deprotectObjectTag(actv.eqip.tagId);
     zteam_deprotectObjectTag(actv.unit.tagId);
     zteam_deprotectObjectTag(actv.weap.tagId);
@@ -825,7 +825,7 @@ static void zteam_deprotectSBSP(TagID tagId,uint32_t fileOffset, uint32_t bspMag
     for(uint32_t i=0;i<sbsp.clusters.count;i++) {
         SBSPClusterShaders *shaders = translateCustomPointer(clusters[i].mirrors.offset, bspMagic, fileOffset);
         for(uint32_t q=0;q<clusters[i].mirrors.count;q++) {
-            zteam_deprotectClass(shaders[i].shader.tagId, shaders[i].shader.mainClass);
+            zteam_deprotectShdr(shaders[i].shader.tagId);
         }
     }
     SBSPFogPallete *fog = translateCustomPointer(sbsp.fog.offset, bspMagic, fileOffset);
@@ -837,13 +837,13 @@ static void zteam_deprotectSBSP(TagID tagId,uint32_t fileOffset, uint32_t bspMag
         zteam_deprotectRain(weather[i].particleSystem.tagId);
         zteam_changeTagClass(weather[i].wind.tagId, WIND);
     }
+    SBSPBackgroundSound *bgSounds = translateCustomPointer(sbsp.backgroundSound.offset, bspMagic, fileOffset);
+    for(uint32_t i=0;i<sbsp.backgroundSound.count;i++) {
+        zteam_deprotectClass(bgSounds[i].sound.tagId, bgSounds[i].sound.mainClass);
+    }
     SBSPEnvironmentPallete *envi = translateCustomPointer(sbsp.soundEnvironment.offset, bspMagic, fileOffset);
     for(uint32_t i=0;i<sbsp.soundEnvironment.count;i++) {
-        zteam_changeTagClass(envi[i].soundEnvironment.tagId, SNDE);
-    }
-    SBSPEnvironmentPallete *bgSounds = translateCustomPointer(sbsp.backgroundSound.offset, bspMagic, fileOffset);
-    for(uint32_t i=0;i<sbsp.soundEnvironment.count;i++) {
-        zteam_deprotectClass(bgSounds[i].soundEnvironment.tagId, bgSounds[i].soundEnvironment.mainClass);
+        zteam_deprotectClass(envi[i].soundEnvironment.tagId, SNDE);
     }
 }
 static void zteam_deprotectHudg(TagID tagId) {
@@ -1181,6 +1181,7 @@ MapData zteam_deprotect(MapData map)
     
     MapTag scenarioTag = tagArray[index->scenarioTag.tagTableIndex];
     zteam_changeTagClass(index->scenarioTag, SCNR);
+    deprotectedTags[index->scenarioTag.tagTableIndex] = true;
     
     ScnrDependencies scnrData = *( ScnrDependencies *)translatePointer(scenarioTag.dataOffset);
     
