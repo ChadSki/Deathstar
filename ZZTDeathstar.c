@@ -91,11 +91,6 @@ static void zteam_deprotectAnt(TagID tagId);
 static void zteam_deprotectPctl(TagID tagId);
 static void zteam_deprotectActv(TagID tagId);
 
-typedef enum {
-    false = 0,
-    true = 1
-} bool;
-
 bool haloCEmap = false;
 
 typedef enum {

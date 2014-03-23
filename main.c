@@ -25,57 +25,10 @@
 #endif
 
 #include "ZZTDeathstar.h"
+#include "ZZTTagData.h"
 
 #define PROG_VERSION "Deathstar 1.0a9"
 #define PROG_CREATED "9th January, 2014"
-typedef enum {
-    false = 0,
-    true = 1
-} bool;
-
-typedef struct {
-    uint16_t tagTableIndex;
-    uint16_t tableIndex;
-} __attribute__((packed)) TagID;
-
-typedef struct {
-    uint32_t classA;
-    uint32_t classB;
-    uint32_t classC;
-    TagID identity;
-    uint32_t nameOffset;
-    uint32_t dataOffset;
-    uint32_t notInsideMap;
-    char padding[0x4];
-} __attribute__((packed)) MapTag;
-
-typedef struct {
-    uint32_t integrityHead;
-    uint32_t version;
-    uint32_t length;
-    uint32_t zero;
-    uint32_t indexOffset;
-    uint32_t metaSize;
-    char padding[0x8];
-    char name[0x20];
-    char builddate[0x20];
-    uint32_t type;
-    char zeroes2[0x198];
-    uint32_t integrityFoot;
-} __attribute__((packed)) HaloMapHeader;
-
-typedef struct {
-    uint32_t tagIndexOffset;
-    TagID scenarioTag;
-    uint32_t mapId;
-    uint32_t tagCount;
-    uint32_t vertexCount;
-    uint32_t vertexOffset;
-    uint32_t indicesCount;
-    uint32_t vertexSize;
-    uint32_t modelSize;
-    uint32_t tags;
-} __attribute__((packed)) HaloMapIndex;
 
 uint32_t swapEndian32(uint32_t integer) {
     char *swappedValue = calloc(4,1);
