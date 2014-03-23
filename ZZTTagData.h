@@ -334,24 +334,24 @@ typedef struct {
 } __attribute__((packed)) SBSPWeatherPallete;
 typedef struct {
     char padding[0x20]; //0x0
-    Dependency soundEnvironment; //0x20
-    char padding1[0x20]; //0x30
+    Dependency sound; //0x20
+    char padding1[0x44]; //0x30
 } __attribute__((packed)) SBSPBackgroundSound;
 typedef struct {
     char padding[0x20]; //0x0
     Dependency soundEnvironment; //0x20
-    char padding1[0x44]; //0x30
+    char padding1[0x20]; //0x30
 } __attribute__((packed)) SBSPEnvironmentPallete;
 typedef struct {
     char padding[0xBC];
     TagReflexive collMaterials;  //0xBC
-    char padding1[0x54];
+    char padding1[0x54]; //0xC8
     TagReflexive lightmaps;      //0x11C
-    char padding2[0xC];
+    char padding2[0xC]; //0x128
     TagReflexive lensFlares; //0x134
-    char padding3[0xC];
+    char padding3[0xC]; //0x140
     TagReflexive clusters; //0x14C
-    char padding4[0x50];
+    char padding4[0x50];         //0x158
     TagReflexive fog;            //0x1A8
     char padding5[0x18];         //0x1B4
     TagReflexive weather;        //0x1CC
