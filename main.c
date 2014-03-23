@@ -26,7 +26,7 @@
 
 #include "ZZTDeathstar.h"
 
-#define PROG_VERSION "Deathstar 1.0a8"
+#define PROG_VERSION "Deathstar 1.0a9"
 #define PROG_CREATED "9th January, 2014"
 typedef enum {
     false = 0,
@@ -300,12 +300,11 @@ int main(int argc, const char * argv[])
         printf("\n");
         printf("Special Thanks\n");
         printf("Modzy - Emergence; Metadata information.\n");
-        printf("Dirk - SDMHaloMapLoader\n");
         printf("WaeV - Map structure; Metadata information.\n");
-        printf("Sparky - Metadata information.\n");
-        printf("Tucker933 - http://opencarnage.net/\n");
-        printf("nil - HaloMD\n");
+        printf("Open Carnage - http://opencarnage.net/\n");
+        printf("Dirk - SDMHaloMapLoader\n");
         printf("The HaloMD Team - http://halomd.net\n");
+        printf("Sparky - Metadata information.\n");
         return 0;
     }
     else {
