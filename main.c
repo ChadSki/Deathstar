@@ -30,8 +30,8 @@
 #define PROG_VERSION "Deathstar 1.0a9"
 #define PROG_CREATED "9th January, 2014"
 
-uint32_t swapEndian32(uint32_t integer) {
-    char *swappedValue = calloc(4,1);
+static inline uint32_t swapEndian32(uint32_t integer) {
+    char swappedValue[4];
     swappedValue[3] = integer       & 0xFF;
     swappedValue[2] = integer >> 8  & 0xFF;
     swappedValue[1] = integer >> 16 & 0xFF;
