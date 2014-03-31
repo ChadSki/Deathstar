@@ -1084,11 +1084,11 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
         if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
             continue;
         
-        const char *genericName = "deathstar\\%s\\tag";
+        const char *genericName = "deathstar\\%s\\%s_tag";
         const char *tagClassName = translateHaloClassToName(tagArray[i].classA);
-        char *bestTagTemp = malloc(strlen(tagClassName) + strlen(genericName) - 2);
+        char *bestTagTemp = malloc(strlen(tagClassName) + strlen(genericName) + strlen(headerOldMap->name) - 2);
         char *bestTag = bestTagTemp;
-        sprintf(bestTag,genericName,tagClassName);
+        sprintf(bestTag,genericName,tagClassName,headerOldMap->name);
         
         if(!classAutogeneric(tagArray[i].classA)) {
             float bestMatch = MATCHING_THRESHOLD;
