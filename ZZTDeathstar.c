@@ -1045,7 +1045,7 @@ static void zteam_deprotectSky(TagID tagId) {
 }
 
 #define MATCHING_THRESHOLD 0.7
-#define MAX_TAG_NAME_SIZE 0x20
+#define MAX_TAG_NAME_SIZE 0x50
 
 MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     uint32_t length = map.length;
@@ -1073,16 +1073,18 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     tagCount = index->tagCount;
     
     for(uint32_t i=0;i<tagCount;i++) {
-        if(!classCanBeDeprotected(tagArray[i].classA) || tagArray[i].nameOffset < META_MEMORY_OFFSET || tagArray[i].nameOffset > META_MEMORY_OFFSET + header->indexOffset) {
+        if(!classCanBeDeprotected(tagArray[i].classA)) {
             continue;
         }
         
         if(haloCEmap && tagArray[i].notInsideMap)
             continue;
-        if(strncmp(translatePointer(tagArray[i].nameOffset),"ui\\",3) == 0)
-            continue;
-        if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
-            continue;
+        if(!(tagArray[i].nameOffset < META_MEMORY_OFFSET || tagArray[i].nameOffset > META_MEMORY_OFFSET + header->metaSize)) {
+            if(strncmp(translatePointer(tagArray[i].nameOffset),"ui\\",3) == 0)
+                continue;
+            if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
+                continue;
+        }
         
         const char *genericName = "deathstar\\%s\\%s_tag";
         const char *tagClassName = translateHaloClassToName(tagArray[i].classA);
@@ -1153,6 +1155,7 @@ MapData zteam_deprotect(MapData map)
     
     for(uint32_t i=0;i<tagCount;i++) {
         deprotectedTags[i] = haloCEmap && tagArray[i].notInsideMap;
+        tagArray[i].identity.tableIndex = tagArray[i].identity.tagTableIndex + 0xE174;
     }
     
     mapdataSize = length;
