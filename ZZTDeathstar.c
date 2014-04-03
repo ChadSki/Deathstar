@@ -1155,7 +1155,6 @@ MapData zteam_deprotect(MapData map)
     
     for(uint32_t i=0;i<tagCount;i++) {
         deprotectedTags[i] = haloCEmap && tagArray[i].notInsideMap;
-        tagArray[i].identity.tableIndex = tagArray[i].identity.tagTableIndex + 0xE174;
     }
     
     mapdataSize = length;
