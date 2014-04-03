@@ -21,9 +21,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
-#ifndef deathstar_ZZTMap_h
-#define deathstar_ZZTMap_h
+#ifndef deathstar_ZZTDeathstar_h
+#define deathstar_ZZTDeathstar_h
 
 typedef enum {
     MAP_OK,
