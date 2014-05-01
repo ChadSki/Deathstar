@@ -27,7 +27,7 @@
 #include "ZZTDeathstar.h"
 #include "ZZTTagData.h"
 
-#define PROG_VERSION "Deathstar 1.0a10"
+#define PROG_VERSION "Deathstar 1.0"
 #define PROG_CREATED "9th January, 2014"
 
 static inline uint32_t swapEndian32(uint32_t integer) {
