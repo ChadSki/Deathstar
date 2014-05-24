@@ -104,7 +104,7 @@ typedef enum {
     OBJECT_MACH = 0x7,
     OBJECT_CTRL = 0x8,
     OBJECT_LIFI = 0x9,
-    OBJECT_PLAC = 0xA,
+    OBJECT_PLAC = 0xA, //kind of a guess
     OBJECT_SSCE = 0xB,
 } TagObjectType;
 
@@ -148,7 +148,7 @@ static bool isNulledOut(TagID tag) {
     return (tag.tableIndex == 0 && tag.tagTableIndex == 0) || tag.tagTableIndex > tagCount;
 }
 
-static void *translatePointer(uint32_t pointer) { //translates a map pointer to where it points to in Deathstar
+static void *translatePointer(uint32_t pointer) { //translates a map pointer to where it points to in the currently loaded buffer
     return mapdata + (pointer - magic);
 }
 
@@ -710,8 +710,7 @@ static void zteam_deprotectObjectTag(TagID tagId) {
 }
 
 static void zteam_deprotectFlag(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId,FLAG);
     FlagDependencies flag = *(FlagDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
@@ -721,8 +720,7 @@ static void zteam_deprotectFlag(TagID tagId) {
 }
 
 static void zteam_deprotectCont(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId,CONT);
     deprotectedTags[tagId.tagTableIndex] = true;
@@ -750,8 +748,7 @@ static inline void zteam_deprotectMatgObjectTagCollection(TagReflexive reflexive
 }
 
 static void zteam_deprotectItmc(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId,ITMC);
     deprotectedTags[tagId.tagTableIndex] = true;
@@ -766,8 +763,7 @@ static void *translateCustomPointer(uint32_t pointer, uint32_t customMagic, uint
     return mapdata + offset + (pointer - customMagic);
 }
 static void zteam_deprotectRain(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, RAIN);
     RainDependency rain = *(RainDependency *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
@@ -780,8 +776,7 @@ static void zteam_deprotectRain(TagID tagId) {
 }
 
 static void zteam_deprotectLsnd(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, LSND);
     LsndDependencies lsnd = *(LsndDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
@@ -797,8 +792,7 @@ static void zteam_deprotectLsnd(TagID tagId) {
 }
 
 static void zteam_deprotectSBSP(TagID tagId,uint32_t fileOffset, uint32_t bspMagic) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, SBSP);
     deprotectedTags[tagId.tagTableIndex] = true;
@@ -842,8 +836,7 @@ static void zteam_deprotectSBSP(TagID tagId,uint32_t fileOffset, uint32_t bspMag
     }
 }
 static void zteam_deprotectHudg(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, HUDG);
     deprotectedTags[tagId.tagTableIndex] = true;
@@ -863,8 +856,7 @@ static void zteam_deprotectHudg(TagID tagId) {
 }
 
 static void zteam_deprotectClass(TagID tagId, char class[4]) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     uint32_t objectTagClasses[] = {
         *(uint32_t *)&BIPD,
@@ -923,8 +915,7 @@ static void zteam_deprotectClass(TagID tagId, char class[4]) {
 }
 
 static void zteam_deprotectGrhi(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, GRHI);
     deprotectedTags[tagId.tagTableIndex] = false;
@@ -944,8 +935,7 @@ static inline void zteam_deprotectDeLaChildWidget(TagReflexive child) {
 }
 
 static void zteam_deprotectDeLa(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, DELA);
     deprotectedTags[tagId.tagTableIndex] = true;
@@ -966,16 +956,14 @@ static void zteam_deprotectDeLa(TagID tagId) {
 }
 
 static void zteam_deprotectHudDigits(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, HUD);
     HudDependencies hud = *(HudDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
     zteam_changeTagClass(hud.digitsBitmap.tagId,BITM);
 }
 static void zteam_deprotectJpt(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, JPT);
     JptDependencies jpt = *(JptDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
@@ -983,8 +971,7 @@ static void zteam_deprotectJpt(TagID tagId) {
 }
 
 static void zteam_deprotectMetr(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, METR);
     //MetrDependencies metr = *(MetrDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
@@ -1010,28 +997,8 @@ static bool classCanBeDeprotected(uint32_t class) {
     return true;
 }
 
-static bool classAutogeneric(uint32_t class) {
-    uint32_t tagClasses[] = { //do not bother to deprotect these tags
-        *(uint32_t *)&BITM,
-        *(uint32_t *)&HUDG,
-        *(uint32_t *)&SND,
-        *(uint32_t *)&SBSP,
-        *(uint32_t *)&SCNR,
-        *(uint32_t *)&ITMC,
-        *(uint32_t *)&USTR,
-        *(uint32_t *)&SOUL,
-        *(uint32_t *)&DELA,
-        *(uint32_t *)&FONT
-    };
-    for(int i=0;i<sizeof(tagClasses)/4;i++) {
-        if(class == tagClasses[i]) return true;
-    }
-    return false;
-}
-
 static void zteam_deprotectSky(TagID tagId) {
-    if(isNulledOut(tagId))
-        return;
+    if(isNulledOut(tagId)) return;
     if(deprotectedTags[tagId.tagTableIndex]) return;
     zteam_changeTagClass(tagId, SKY);
     SkyDependencies sky = *(SkyDependencies *)translatePointer(tagArray[tagId.tagTableIndex].dataOffset);
@@ -1078,39 +1045,24 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
         }
         
         if(haloCEmap && tagArray[i].notInsideMap)
-            continue;
+        continue;
         if(!(tagArray[i].nameOffset < META_MEMORY_OFFSET || tagArray[i].nameOffset > META_MEMORY_OFFSET + header->metaSize)) {
             if(strncmp(translatePointer(tagArray[i].nameOffset),"ui\\",3) == 0)
-                continue;
+            continue;
             if(strncmp(translatePointer(tagArray[i].nameOffset),"sound\\",6) == 0)
-                continue;
+            continue;
         }
         
-        const char *genericName = "deathstar\\%s\\%s\\tag";
+        const char *genericName = "deathstar\\%s\\%s\\tag_%u";
         const char *tagClassName = translateHaloClassToName(tagArray[i].classA);
-        char *bestTagTemp = malloc(strlen(tagClassName) + strlen(genericName) + strlen(headerOldMap->name) - 2);
-        char *bestTag = bestTagTemp;
-        sprintf(bestTag,genericName,headerOldMap->name,tagClassName);
-        
-        if(!classAutogeneric(tagArray[i].classA)) {
-            float bestMatch = MATCHING_THRESHOLD;
-            for(int map=0;map<map_count;map++) {
-                if(maps[map].error != MAP_OK) continue; //map is not a Halo cache map.
-                float currentMatch = 0.0;
-                //TODO: add fuzzy tag comparison
-                if(currentMatch > bestMatch) {
-                    //bestTag = currentTagName;
-                }
-            }
-        }
-        
-        sprintf(names + namesLength, "%s_%u", bestTag, i); //all tags get a _# prefix
-        
-        free(bestTagTemp);
-        
-        int newname_length = (int)strlen(names + namesLength);
+        sprintf(names + namesLength,genericName,headerOldMap->name,tagClassName,i);
         
         tagArray[i].nameOffset = length + namesLength + magic;
+        
+        size_t newname_length = strlen(names + namesLength);
+        if(newname_length > MAX_TAG_NAME_SIZE - 1) {
+            newname_length = MAX_TAG_NAME_SIZE - 1;
+        }
         
         namesLength += newname_length + 0x1;
     }
@@ -1124,7 +1076,6 @@ MapData name_deprotect(MapData map, MapData *maps, int map_count) {
     new_map.buffer = modded_buffer;
     new_map.length = new_length;
     new_map.error = MAP_OK;
-    
     return new_map;
 }
 
