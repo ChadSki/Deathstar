@@ -1,7 +1,12 @@
 // main.c
 
-/*
+ /*
+ This is an example command line tool. You can use this if you want an example of using the library, or
+ if you want to compile the tool for your operating system. A makefile is provided, as well. Be sure to
+ not include this file in your project.
+ */
  
+ /*
  Copyright (c) 2014, Paul Whitcomb
  All rights reserved.
  
