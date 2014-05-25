@@ -12,3 +12,13 @@ Halo PC Map Deprotection Library
 MapData exampleMapBuffer = openMapFromBuffer((void *)buffer, (uint32_t)length);
 MapData exampleMapPath = openMapAtPath((char *)path);
 ```
+
+#### Map Deprotection
+  There are two methods used for deprotecting maps, which can be used together if needed. ZTeam Deprotection deobfuscates tag classes, and name deprotection deobfuscates tag names. Tag names cannot be recovered.
+
+``` c
+MapData exampleMap = openMapFromBuffer((void *)buffer, (uint32_t)length);
+MapData deprotectedVersion = zteam_deprotectMap(exampleMap);
+free(exampleMap.buffer);  //The methods allocate a new buffer. Depending on what you are
+                          //trying to do, you may want to free the original buffer.
+```
