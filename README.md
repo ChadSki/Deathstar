@@ -14,7 +14,7 @@ MapData exampleMapPath = openMapAtPath((char *)path);
 ```
 
 #### Map Deprotection
-  There are two methods used for deprotecting maps, which can be used together if needed. ZTeam Deprotection deobfuscates tag classes, and name deprotection deobfuscates tag names. Tag names cannot be recovered.
+  There are two methods used for deprotecting maps, which can be used together if needed. ZTeam Deprotection deobfuscates tag classes, and name deprotection deobfuscates tag names. Tag names cannot be recovered, if they were obfuscated.
 
 ``` c
 MapData exampleMap = openMapFromBuffer((void *)buffer, (uint32_t)length);
