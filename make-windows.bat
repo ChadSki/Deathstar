@@ -1,0 +1,1 @@
+gcc -std=c99 ZZTTagClasses.c ZZTDeathstar.c main.c -o deathstar.exe
