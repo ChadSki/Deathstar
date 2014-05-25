@@ -18,7 +18,7 @@ MapData exampleMapPath = openMapAtPath((char *)path);
 
 ``` c
 MapData exampleMap = openMapFromBuffer((void *)buffer, (uint32_t)length);
-MapData deprotectedVersion = zteam_deprotectMap(exampleMap);
+MapData deprotectedVersion = zteam_deprotect(exampleMap);
 free(exampleMap.buffer);  //The methods allocate a new buffer. Depending on what you are
                           //trying to do, you may want to free the original buffer.
 ```
