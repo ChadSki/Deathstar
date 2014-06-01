@@ -51,7 +51,7 @@ typedef struct {
 	char name[0x20];
 	char builddate[0x20];
 	uint32_t type;
-    char zeroes2[0x198];
+    char zeroes2[0x798];
     uint32_t integrityFoot;
 } HaloMapHeader;
 

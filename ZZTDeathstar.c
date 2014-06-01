@@ -25,7 +25,7 @@
 MapData openMapFromBuffer(void *buffer,uint32_t length) {
     MapData mapData;
     HaloMapHeader *mapHeader = ( HaloMapHeader *)(buffer);
-    if(mapHeader->integrityHead == *(uint32_t *)&"deah" || mapHeader->integrityFoot == *(uint32_t *)&"toof") {
+    if(mapHeader->integrityHead == *(uint32_t *)&"deah" && mapHeader->integrityFoot == *(uint32_t *)&"toof") {
         mapData.error = MAP_INVALID_HEADER;
     }
     else if(mapHeader->indexOffset > length) {
