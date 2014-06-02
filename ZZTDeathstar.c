@@ -1014,7 +1014,7 @@ static void zteam_deprotectSky(TagID tagId) {
 #define MATCHING_THRESHOLD 0.7
 #define MAX_TAG_NAME_SIZE 0x50
 
-MapData name_deprotect(MapData map, MapData *maps, int map_count) {
+MapData name_deprotect(MapData map) {
     uint32_t length = map.length;
     
     HaloMapHeader *headerOldMap = ( HaloMapHeader *)(map.buffer);

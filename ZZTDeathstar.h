@@ -44,6 +44,6 @@ MapData openMapAtPath(const char *path);
 MapData openMapFromBuffer(void *buffer,uint32_t length);
 int saveMap(const char *path, MapData map);
 MapData zteam_deprotect(MapData map);
-MapData name_deprotect(MapData map, MapData *maps, int map_count);
+MapData name_deprotect(MapData map);
 
 #endif
