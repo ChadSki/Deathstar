@@ -22,20 +22,22 @@
 #include "ZZTDeathstar.h"
 #include "ZZTTagData.h"
 
-MapData openMapFromBuffer(void *buffer,uint32_t length) {
+
+
+MapData openMapFromBuffer(void *buffer) {
     MapData mapData;
     HaloMapHeader *mapHeader = ( HaloMapHeader *)(buffer);
-    if(mapHeader->integrityHead == *(uint32_t *)&"deah" || mapHeader->integrityFoot == *(uint32_t *)&"toof") {
+    if(mapHeader->integrityHead == *(uint32_t *)&"deah" && mapHeader->integrityFoot == *(uint32_t *)&"toof") {
         mapData.error = MAP_INVALID_HEADER;
     }
-    else if(mapHeader->indexOffset > length) {
+    else if(mapHeader->indexOffset > mapHeader->length) {
         mapData.error = MAP_INVALID_INDEX_POINTER;
     }
     else {
         mapData.error = MAP_OK;
     }
     mapData.buffer = buffer;
-    mapData.length = length;
+    mapData.length = mapHeader->length;
     return mapData;
 }
 
@@ -49,7 +51,7 @@ MapData openMapAtPath(const char *path) {
         void *buffer = malloc(length);
         fread(buffer,length,0x1,map);
         fclose(map);
-        return openMapFromBuffer(buffer, length);
+        return openMapFromBuffer(buffer);
     }
     else {
         MapData invalidMap;
@@ -1014,7 +1016,7 @@ static void zteam_deprotectSky(TagID tagId) {
 #define MATCHING_THRESHOLD 0.7
 #define MAX_TAG_NAME_SIZE 0x50
 
-MapData name_deprotect(MapData map, MapData *maps, int map_count) {
+MapData name_deprotect(MapData map) {
     uint32_t length = map.length;
     
     HaloMapHeader *headerOldMap = ( HaloMapHeader *)(map.buffer);
