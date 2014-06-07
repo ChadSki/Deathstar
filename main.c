@@ -174,7 +174,7 @@ int main(int argc, const char * argv[])
                 maps[i] = openMapAtPath(argv[i]);
             }
             
-            MapData final_map = name_deprotect(map, maps, argc - 3);
+            MapData final_map = name_deprotect(map);
             if(saveMap(argv[2], final_map) == 0)
                 printf("Completed. Map has been saved!\n");
             else
@@ -208,7 +208,7 @@ int main(int argc, const char * argv[])
                 maps[i] = openMapAtPath(argv[i]);
             }
             
-            MapData final_map = name_deprotect(zteam_map, maps, argc - 3);
+            MapData final_map = name_deprotect(zteam_map);
             
             if(saveMap(argv[2], final_map) == 0)
                 printf("Completed. Map has been saved!\n");

@@ -41,7 +41,7 @@ typedef struct {
 
 
 MapData openMapAtPath(const char *path);
-MapData openMapFromBuffer(void *buffer,uint32_t length);
+MapData openMapFromBuffer(void *buffer);
 int saveMap(const char *path, MapData map);
 MapData zteam_deprotect(MapData map);
 MapData name_deprotect(MapData map);
